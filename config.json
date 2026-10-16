@@ -1,0 +1,28 @@
+{
+  "gamerTag": "Dark Phoneix",
+  "title": "Dark Phoneix — Stream & Clips Vault",
+  "tagline": "Fortnite grinds and clutch stream highlights, logged in one place.",
+  "bio": "Fortnite grinder repping LDG. Ranked grinds, clutch plays and squad chaos — live on Kick, highlights everywhere else.",
+  "primaryGames": ["Fortnite", "VALORANT", "Apex Legends", "Marvel Rivals", "Counter-Strike 2"],
+  "schedule": [
+    { "days": "Mon - Thu", "time": "7:00 PM - 11:30 PM EST", "activity": "Ranked VALORANT & Squad Queues" },
+    { "days": "Friday", "time": "8:00 PM - Late", "activity": "Community Games & Viewer 5v5s" },
+    { "days": "Saturday", "time": "2:00 PM - 8:00 PM EST", "activity": "Tournament Watch Parties & Grinds" },
+    { "days": "Sunday", "time": "Off / Clips Review", "activity": "Vod Reviews & Rest Day" }
+  ],
+  "socials": {
+    "twitch": "https://twitch.tv/ryan",
+    "youtube": "https://youtube.com/@ryan",
+    "discord": "https://discord.gg/ryan",
+    "twitter": "https://x.com/ryan",
+    "kick": "https://kick.com/dark-phoneix"
+  },
+  "twitchChannel": "ryan",
+  "kickChannel": "dark-phoneix",
+  "fortniteTag": "DarkPhoneix_LDG",
+  "theme": {
+    "accentColor": "#ff0000",
+    "twitchColor": "#9146ff",
+    "bgDark": "#0b0d10"
+  }
+}

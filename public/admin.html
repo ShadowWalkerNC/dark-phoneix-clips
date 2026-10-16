@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Dark Phoneix Clip Log</title>
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .admin { max-width: 960px; margin: 0 auto; padding: clamp(24px, 5vw, 56px) var(--gutter) 72px; width: 100%; }
+    .admin h1 { font-family: var(--display); font-weight: 800; text-transform: uppercase; font-size: clamp(2.6rem, 7vw, 4.5rem); line-height: .95; }
+    .admin .lede { color: var(--mute); max-width: 62ch; margin: 12px 0 32px; }
+    .panel { border: 1px solid var(--line); background: var(--panel); padding: 20px; margin-bottom: 20px; }
+    .panel > h2 { font-family: var(--mono); font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; padding-bottom: 12px; margin-bottom: 16px; border-bottom: 2px solid var(--bone); }
+    .panel > h2 .step { color: var(--red); margin-right: 8px; }
+    .frow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .frow.single { grid-template-columns: 1fr; }
+    label.afield { display: flex; flex-direction: column; gap: 6px; font-family: var(--mono); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--mute); }
+    .afield input, .afield select, .afield textarea { min-height: 44px; padding: 10px 12px; background: var(--ink); border: 1px solid var(--line); border-radius: 0; font-family: var(--body); font-size: .95rem; color: var(--bone); text-transform: none; letter-spacing: normal; }
+    .afield textarea { min-height: 96px; resize: vertical; }
+    .afield input:focus, .afield select:focus, .afield textarea:focus { border-color: var(--bone); outline: none; }
+    .arow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 16px; }
+    .check { list-style: none; display: flex; flex-direction: column; gap: 0; }
+    .check li { display: flex; gap: 12px; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--line); }
+    .check li:last-child { border-bottom: 0; }
+    .dot { font-family: var(--mono); font-weight: 700; flex: none; width: 3.2rem; }
+    .dot.ok { color: #4ade80; }
+    .dot.no { color: var(--red); }
+    .check small { display: block; color: var(--mute); font-family: var(--mono); font-size: .72rem; letter-spacing: .04em; }
+    .kv { font-family: var(--mono); font-size: .78rem; word-break: break-all; background: var(--ink); border: 1px solid var(--line); padding: 10px 12px; margin: 6px 0; display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+    .kv button { flex: none; }
+    .mini { min-height: 36px; padding: 0 12px; background: transparent; border: 1px solid var(--bone); cursor: pointer; font-family: var(--mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; }
+    .mini:hover { background: var(--bone); color: var(--ink); }
+    .msg { font-family: var(--mono); font-size: .8rem; margin-top: 12px; }
+    .msg.ok { color: #4ade80; }
+    .msg.err { color: var(--red); }
+    .cliplist { list-style: none; }
+    .cliplist li { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 12px 0; border-bottom: 1px solid var(--line); align-items: center; }
+    .cliplist li:last-child { border-bottom: 0; }
+    .cliplist .t { font-weight: 700; }
+    .cliplist .m { font-family: var(--mono); font-size: .72rem; color: var(--mute); grid-column: 1 / -1; }
+    .cliplist .ops { display: flex; gap: 6px; flex-wrap: wrap; }
+    .cliplist select, .cliplist input { min-height: 36px; background: var(--ink); border: 1px solid var(--line); padding: 0 8px; font-size: .8rem; max-width: 130px; }
+    .hint { color: var(--mute); font-size: .85rem; margin: 8px 0; }
+    .hint a, .panel a.textlink { color: var(--bone); }
+    details.guide { border: 1px solid var(--line); background: var(--ink); margin: 8px 0; }
+    details.guide summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; padding: 10px 14px; font-family: var(--mono); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; }
+    details.guide summary:hover { color: var(--red); }
+    details.guide ol { padding: 0 16px 16px 36px; display: flex; flex-direction: column; gap: 10px; font-size: .9rem; }
+    details.guide code { font-family: var(--mono); font-size: .78rem; background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; word-break: break-all; }
+    details.guide a { text-decoration: underline; text-underline-offset: 3px; }
+    @media (max-width: 720px) { .frow { grid-template-columns: 1fr; } .cliplist li { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="bar">
+    <a class="brand" href="/"><span class="rec" aria-hidden="true"></span>RYAN</a>
+    <nav aria-label="Primary">
+      <a href="/">View site</a>
+      <a href="/admin" aria-current="page">Admin</a>
+    </nav>
+  </header>
+
+  <main id="main" class="admin">
+    <p class="mono hero-eyebrow">Control room / owner only</p>
+    <h1>Admin console</h1>
+    <p class="lede">Log in to edit the page, paste video links, and finish the Twitch / YouTube / Discord setup. Secrets live in Railway Variables — this console never shows their values.</p>
+
+    <!-- Login -->
+    <section id="login-panel" class="panel" aria-labelledby="login-h">
+      <h2 id="login-h">Log in</h2>
+      <form id="login-form">
+        <div class="frow">
+          <label class="afield">Username
+            <input id="login-user" name="user" type="text" value="Admin" autocomplete="username" required>
+          </label>
+          <label class="afield">Password
+            <input id="login-pass" name="pass" type="password" autocomplete="current-password" required>
+          </label>
+        </div>
+        <div class="arow">
+          <button class="btn btn-red" type="submit">Log in</button>
+        </div>
+        <p id="login-msg" class="msg" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <!-- Console -->
+    <div id="console" hidden>
+      <section class="panel" aria-labelledby="check-h">
+        <h2 id="check-h"><span class="step">01</span>Setup checklist</h2>
+        <ul id="checklist" class="check"></ul>
+        <p class="hint">Everything is guided in section 03 below — no docs needed. Refresh this page after changing Railway Variables.</p>
+        <div class="arow">
+          <button class="mini" id="btn-sync" type="button">Run sync now</button>
+          <button class="mini" id="btn-discord" type="button">Send Discord test</button>
+          <button class="mini" id="btn-logout" type="button">Log out</button>
+        </div>
+        <p id="actions-msg" class="msg" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="panel" aria-labelledby="prof-h">
+        <h2 id="prof-h"><span class="step">02</span>Page profile + social links</h2>
+        <form id="profile-form">
+          <div class="frow">
+            <label class="afield">Gamer tag <input id="f-gamertag" type="text" maxlength="120"></label>
+            <label class="afield">Twitch channel (no @) <input id="f-channel" type="text" maxlength="120"></label>
+          </div>
+          <div class="frow single">
+            <label class="afield">Page title <input id="f-title" type="text" maxlength="120"></label>
+          </div>
+          <div class="frow single">
+            <label class="afield">Fortnite tag <input id="f-fortnite" type="text" maxlength="60" placeholder="Epic username"></label>
+          </div>
+          <div class="frow single">
+            <label class="afield">Tagline <input id="f-tagline" type="text" maxlength="120"></label>
+          </div>
+          <div class="frow single">
+            <label class="afield">Bio <textarea id="f-bio" maxlength="2000"></textarea></label>
+          </div>
+          <div class="frow single">
+            <label class="afield">Main games (comma separated) <input id="f-games" type="text" placeholder="VALORANT, Apex Legends"></label>
+          </div>
+          <div class="frow">
+            <label class="afield">Twitch URL <input id="f-tw" type="url" placeholder="https://twitch.tv/..."></label>
+            <label class="afield">YouTube URL <input id="f-yt" type="url" placeholder="https://youtube.com/@..."></label>
+          </div>
+          <div class="frow">
+            <label class="afield">Discord invite <input id="f-dc" type="url" placeholder="https://discord.gg/..."></label>
+            <label class="afield">X / Twitter URL <input id="f-x" type="url" placeholder="https://x.com/..."></label>
+          </div>
+          <div class="frow single">
+            <label class="afield">Kick URL <input id="f-kick" type="url" placeholder="https://kick.com/..."></label>
+          </div>
+          <div class="frow single">
+            <label class="afield">Schedule (one per line: days | time | activity)
+              <textarea id="f-schedule" placeholder="Mon - Thu | 7:00 PM - 11:30 PM EST | Ranked grind"></textarea>
+            </label>
+          </div>
+          <div class="arow">
+            <button class="btn btn-red" type="submit">Save page</button>
+          </div>
+          <p id="profile-msg" class="msg" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="panel" aria-labelledby="conn-h">
+        <h2 id="conn-h"><span class="step">03</span>Connections: Twitch / YouTube / Discord</h2>
+        <div id="conn-status"></div>
+        <p class="hint">Step 1 — create the apps and paste IDs + secrets into Railway Variables (service → Variables tab). Step 2 — come back here and hit Connect so Ryan's own accounts authorize the site.</p>
+        <div class="arow">
+          <a class="btn" href="/auth/twitch">Connect Twitch</a>
+          <a class="btn" href="/auth/youtube">Connect YouTube</a>
+        </div>
+        <p class="hint">After Connect, copy the refresh token shown on screen into Railway Variables (<code>TWITCH_REFRESH_TOKEN</code> / <code>YOUTUBE_REFRESH_TOKEN</code>) and redeploy.</p>
+        <div id="webhook-box"></div>
+        <p class="hint">Setup walkthrough — open each, follow the steps, done. The checklist in section 01 turns green as you go.</p>
+
+        <details class="guide" open>
+          <summary>1 · Twitch auto-sync + LIVE badge (~5 min)</summary>
+          <ol>
+            <li>Register an app at <a href="https://dev.twitch.tv/console/apps" target="_blank" rel="noopener noreferrer">dev.twitch.tv/console/apps</a> → Register Your Application. Name it anything, set the OAuth Redirect URL to <code data-basepath="/auth/twitch/callback"></code>, category Website Integration → Create. Copy the <strong>Client ID</strong>, then create + copy a <strong>Client Secret</strong>.</li>
+            <li>Find your numeric broadcaster ID: open <code>https://decapi.me/twitch/id/YOUR-TWITCH-NAME</code> (swap in your name) — the number it returns is the ID.</li>
+            <li>In the Railway dashboard (service → Variables tab) add: <code>TWITCH_CLIENT_ID</code>, <code>TWITCH_CLIENT_SECRET</code>, <code>TWITCH_BROADCASTER_ID</code>. (If <code>TWITCH_EVENTSUB_SECRET</code> is missing, add any random string.) Saving redeploys automatically.</li>
+            <li>Back here, hit <strong>Connect Twitch</strong> above → authorize with your Twitch account → copy the <code>TWITCH_REFRESH_TOKEN</code> shown on screen into Railway Variables.</li>
+            <li>Refresh this page — the Twitch rows go green. The LIVE badge and post-stream clip pulls now work.</li>
+          </ol>
+        </details>
+
+        <details class="guide">
+          <summary>2 · YouTube auto-sync + new-video alerts (~7 min)</summary>
+          <ol>
+            <li>In the <a href="https://console.cloud.google.com" target="_blank" rel="noopener noreferrer">Google Cloud Console</a> create a project, then enable the <strong>YouTube Data API v3</strong> (APIs &amp; Services → Library).</li>
+            <li>APIs &amp; Services → OAuth consent screen → External → app name + your email → add the <code>.../auth/youtube.readonly</code> scope → add yourself as a test user.</li>
+            <li>Credentials → Create Credentials → OAuth client ID → Web application → Authorized redirect URI: <code data-basepath="/auth/youtube/callback"></code> → copy the <strong>Client ID</strong> + <strong>Client Secret</strong>.</li>
+            <li>Find your channel ID: it starts with <code>UC</code> — your channel URL or YouTube Settings → Advanced settings.</li>
+            <li>In Railway Variables add: <code>YOUTUBE_CLIENT_ID</code>, <code>YOUTUBE_CLIENT_SECRET</code>, <code>YOUTUBE_CHANNEL_ID</code>.</li>
+            <li>Back here, hit <strong>Connect YouTube</strong> → authorize with your Google account → copy the <code>YOUTUBE_REFRESH_TOKEN</code> into Railway Variables.</li>
+            <li>Refresh this page — the YouTube rows go green. New uploads appear automatically.</li>
+          </ol>
+        </details>
+
+        <details class="guide">
+          <summary>3 · Discord alerts (~2 min)</summary>
+          <ol>
+            <li>In your Discord server: channel Settings → Integrations → Webhooks → New Webhook → Copy Webhook URL.</li>
+            <li>In Railway Variables add it as <code>DISCORD_WEBHOOK_URL</code>.</li>
+            <li>Hit <strong>Send Discord test</strong> in section 01 — the message should land in the channel. Going live and new YouTube uploads will post there too.</li>
+            <li>Paste your server invite link in section 02 so followers can join.</li>
+          </ol>
+        </details>
+
+        <details class="guide">
+          <summary>4 · Railway Variables + password</summary>
+          <ol>
+            <li>Open the Railway project → your service → <strong>Variables</strong> tab → + New Variable → paste name + value. Every save redeploys by itself; then refresh this page.</li>
+            <li>Change the default Admin password: set a new <code>ADMIN_PASS</code> (and <code>ADMIN_USER</code> if you like) in Variables. The checklist stops nagging once the defaults are gone.</li>
+            <li>Rule of thumb: page content lives here in <code>/admin</code>, secrets live in Railway Variables. If a Connect button says "not configured", that variable is still empty.</li>
+          </ol>
+        </details>
+      </section>
+
+      <section class="panel" aria-labelledby="add-h">
+        <h2 id="add-h"><span class="step">04</span>Add a video by link</h2>
+        <p class="hint">Works before any API keys exist. Paste a Twitch clip or YouTube link — first real clip removes the placeholders.</p>
+        <form id="add-form">
+          <div class="frow single">
+            <label class="afield">Video URL <input id="a-url" type="url" required placeholder="https://clips.twitch.tv/... or https://www.youtube.com/watch?v=..."></label>
+          </div>
+          <div class="frow">
+            <label class="afield">Title (optional backup) <input id="a-title" type="text"></label>
+            <label class="afield">Game <input id="a-game" type="text" placeholder="VALORANT"></label>
+          </div>
+          <div class="frow">
+            <label class="afield">Vibe
+              <select id="a-vibe">
+                <option value="">Auto</option>
+                <option value="clutch">Clutch</option>
+                <option value="ace">Ace</option>
+                <option value="funny">Funny</option>
+                <option value="epic">Epic</option>
+              </select>
+            </label>
+            <label class="afield">Featured?
+              <select id="a-featured"><option value="">No</option><option value="1">Yes — hero player</option></select>
+            </label>
+          </div>
+          <div class="arow">
+            <button class="btn btn-red" type="submit">Add video</button>
+          </div>
+          <p id="add-msg" class="msg" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="panel" aria-labelledby="clips-h">
+        <h2 id="clips-h"><span class="step">05</span>Clip shelf</h2>
+        <p class="hint">Retag vibes, fix game names, or pick the featured hero clip. Changes save instantly.</p>
+        <ul id="cliplist" class="cliplist"></ul>
+      </section>
+    </div>
+  </main>
+
+  <script src="admin.js"></script>
+</body>
+</html>

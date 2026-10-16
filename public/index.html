@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dark Phoneix — Clip Log</title>
+  <meta name="description" content="Dark Phoneix clips from Twitch and YouTube, logged in one place. Live status included.">
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="bar">
+    <a class="brand" href="#home" aria-label="Dark Phoneix, back to top"><span class="rec" aria-hidden="true"></span>DARK PHONEIX</a>
+    <nav aria-label="Primary">
+      <a href="#home">Home</a>
+      <a href="#clips">Clips</a>
+      <a href="#about">About</a>
+      <a href="/admin">Admin</a>
+    </nav>
+  </header>
+
+  <!-- Only rendered visible when status.json says live -->
+  <a id="onair" class="onair" hidden href="https://twitch.tv/ryan" target="_blank" rel="noopener noreferrer">
+    <span class="onair-tag"><span class="rec" aria-hidden="true"></span>LIVE NOW</span>
+    <span id="onair-detail" class="onair-detail"></span>
+    <span class="onair-cta">Watch on Twitch →</span>
+  </a>
+
+  <main id="main">
+    <section id="home" class="hero" aria-labelledby="gamer-tag">
+      <p class="mono hero-eyebrow">Clip log / Twitch + YouTube</p>
+      <h1 id="gamer-tag" class="hero-tag">DARK PHONEIX</h1>
+      <div class="hero-side">
+        <p id="gamer-tagline" class="hero-tagline"></p>
+        <div class="links">
+          <a id="social-youtube" class="btn btn-red" href="https://youtube.com/@ryan" target="_blank" rel="noopener noreferrer">YouTube</a>
+          <a id="social-twitch" class="btn" href="https://twitch.tv/ryan" target="_blank" rel="noopener noreferrer">Twitch</a>
+          <a id="social-discord" class="btn" href="https://discord.gg/ryan" target="_blank" rel="noopener noreferrer">Discord</a>
+          <a id="social-kick" class="btn btn-gold" href="https://kick.com/" target="_blank" rel="noopener noreferrer">Kick</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="featured" class="featured" aria-labelledby="featured-label" hidden>
+      <div class="section-label">
+        <h2 id="featured-label" class="mono">Featured</h2>
+        <span id="featured-index" class="mono dim"></span>
+      </div>
+      <div id="featured-player" class="frame"></div>
+      <div class="featured-caption">
+        <h3 id="featured-title" class="featured-title"></h3>
+        <div>
+          <p id="featured-meta" class="mono meta"></p>
+          <a id="featured-link" class="textlink" target="_blank" rel="noopener noreferrer" hidden>Open original →</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="clips" class="wall" aria-labelledby="wall-title">
+      <div class="section-label">
+        <h2 id="wall-title" class="mono">The log</h2>
+        <span id="result-count" class="mono dim" role="status" aria-live="polite"></span>
+      </div>
+
+      <p id="demo-note" class="demo-note mono" hidden>
+        Placeholder clips. Paste real links with <code>POST /api/add</code> (see README) and these disappear.
+      </p>
+
+      <div class="controls">
+        <div class="group" role="group" aria-label="Platform">
+          <button type="button" class="chip" data-platform="all" aria-pressed="true">All</button>
+          <button type="button" class="chip" data-platform="twitch" aria-pressed="false">Twitch</button>
+          <button type="button" class="chip" data-platform="youtube" aria-pressed="false">YouTube</button>
+        </div>
+        <div class="fields">
+          <label class="field">
+            <span class="sr">Search clips</span>
+            <input id="search" type="search" placeholder="Search" autocomplete="off">
+          </label>
+          <label class="field">
+            <span class="sr">Filter by game</span>
+            <select id="game-filter"><option value="all">All games</option></select>
+          </label>
+        </div>
+      </div>
+
+      <div class="group vibes" role="group" aria-label="Vibe">
+        <button type="button" class="chip" data-vibe="all" aria-pressed="true">All</button>
+        <button type="button" class="chip" data-vibe="clutch" aria-pressed="false">Clutch</button>
+        <button type="button" class="chip" data-vibe="ace" aria-pressed="false">Ace</button>
+        <button type="button" class="chip" data-vibe="funny" aria-pressed="false">Funny</button>
+        <button type="button" class="chip" data-vibe="epic" aria-pressed="false">Epic</button>
+      </div>
+
+      <ul id="grid" class="grid"></ul>
+      <p id="empty" class="empty mono" hidden>Nothing matches. Clear a filter.</p>
+    </section>
+
+    <section id="about" class="about" aria-labelledby="about-title">
+      <div class="section-label"><h2 id="about-title" class="mono">About</h2></div>
+      <div class="about-grid">
+        <div>
+          <p id="bio" class="bio"></p>
+          <ul id="games" class="games" aria-label="Main games"></ul>
+          <p id="fortnite-tag" class="mono dim" style="margin-top:16px" hidden></p>
+        </div>
+        <dl id="schedule" class="schedule" aria-label="Stream schedule"></dl>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="modal" class="modal" aria-labelledby="modal-title">
+    <div class="modal-inner">
+      <div class="modal-head">
+        <p id="modal-meta" class="mono meta"></p>
+        <button id="modal-close" type="button" class="close" aria-label="Close player">Close ✕</button>
+      </div>
+      <div id="modal-player" class="frame"></div>
+      <div class="modal-foot">
+        <h3 id="modal-title"></h3>
+        <a id="modal-link" class="textlink" target="_blank" rel="noopener noreferrer" hidden>Open original →</a>
+      </div>
+    </div>
+  </dialog>
+
+  <footer class="foot">
+    <span class="mono dim" id="foot-copy"></span>
+    <nav aria-label="Social" class="foot-links" id="foot-links"></nav>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

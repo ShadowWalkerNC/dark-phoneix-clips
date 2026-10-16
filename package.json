@@ -1,0 +1,25 @@
+{
+  "name": "ryans-clips-site",
+  "version": "1.0.0",
+  "description": "Dark Phoneix gaming clips portal and live status dashboard",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "dev:client": "vite --config client/vite.config.mjs",
+    "build": "vite build --config client/vite.config.mjs",
+    "test": "npm run build && node --test test/server.test.js test/admin.test.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "fast-xml-parser": "^4.5.3",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.2",
+    "vite": "^8.3.4"
+  }
+}
