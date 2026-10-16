@@ -25,8 +25,10 @@ const {
   addClipByUrl,
   updateCuration,
   mergeClips,
-  runFullSync
+  runFullSync,
+  getCuration
 } = require('./lib/syncService');
+const { initDb } = require('./lib/db');
 
 const {
   getTwitchAuthUrl,
@@ -480,6 +482,13 @@ if (require.main === module) {
     console.log(`[Dark Phoneix Clips Site] Running on http://localhost:${PORT}`);
     if (isDefaultCredentials()) {
       console.warn('[Security] Using default Admin login. Set ADMIN_USER + ADMIN_PASS in Railway Variables.');
+    }
+    if (process.env.DATABASE_URL) {
+      initDb(getClips(), getCuration(), getSiteConfig())
+        .then(ok => {
+          if (ok) console.log('[PostgreSQL] Connected and schema verified.');
+        })
+        .catch(e => console.warn('[PostgreSQL Init Error]:', e.message));
     }
     scheduleMidnightSync();
     runFullSync().catch(e => console.error('[Startup Sync]', e.message));
