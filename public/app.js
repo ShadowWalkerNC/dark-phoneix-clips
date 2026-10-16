@@ -43,6 +43,10 @@ function playerHtml(clip, autoplay) {
   if (clip.placeholder) {
     return `<div class="slate"><span class="mono dim">Placeholder</span><strong>Real clip goes here</strong></div>`;
   }
+  if (clip.platform === 'kick') {
+    const stream = clip.video_url || (clip.thumbnail ? clip.thumbnail.replace('/thumbnail.webp', '/playlist.m3u8') : '');
+    return `<video src="${esc(stream)}" poster="${esc(clip.thumbnail || '')}" controls playsinline preload="metadata" ${autoplay ? 'autoplay' : ''} style="width:100%;height:100%;object-fit:contain;background:#000;display:block;"></video>`;
+  }
   return `<iframe src="${embedUrl(clip, autoplay)}" title="${esc(clip.title)}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen ${autoplay ? '' : 'loading="lazy"'}></iframe>`;
 }
 

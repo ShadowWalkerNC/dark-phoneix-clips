@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Hls from 'hls.js';
 import { embedUrl, getJson } from './lib/api.js';
 import { fmtDate, fmtViews, metaLine, numberClips, pad3, platformLabel, vibeLabel } from './lib/format.js';
 
@@ -61,11 +62,56 @@ function Hero({ cfg }) {
   );
 }
 
+function KickPlayer({ clip, autoplay }) {
+  const videoRef = useRef(null);
+  const streamUrl =
+    clip.video_url ||
+    (clip.thumbnail ? clip.thumbnail.replace('/thumbnail.webp', '/playlist.m3u8') : null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !streamUrl) return;
+
+    let hls = null;
+    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = streamUrl;
+      if (autoplay) video.play().catch(() => {});
+    } else if (Hls.isSupported()) {
+      hls = new Hls({ enableWorker: true });
+      hls.loadSource(streamUrl);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        if (autoplay) video.play().catch(() => {});
+      });
+    }
+
+    return () => {
+      if (hls) {
+        hls.destroy();
+      }
+    };
+  }, [streamUrl, autoplay]);
+
+  return (
+    <video
+      ref={videoRef}
+      poster={clip.thumbnail}
+      controls
+      playsInline
+      preload="metadata"
+      style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#000', display: 'block' }}
+    />
+  );
+}
+
 function Player({ clip, autoplay }) {
   if (clip.placeholder) {
     return (
       <div className="slate"><span className="mono dim">Placeholder</span><strong>Real clip goes here</strong></div>
     );
+  }
+  if (clip.platform === 'kick') {
+    return <KickPlayer clip={clip} autoplay={autoplay} />;
   }
   return (
     <iframe

@@ -11,7 +11,8 @@
     "published_at": "2025-08-09T03:17:25.930035Z",
     "views": 2,
     "vibe": "highlight",
-    "featured": true
+    "featured": true,
+    "video_url": "https://clips.kick.com/clips/21/clip_01K26DA8JW7MXS32133S84MJP3/playlist.m3u8"
   },
   {
     "platform": "kick",
@@ -23,9 +24,10 @@
     "thumbnail": "https://clips.kick.com/clips/c4/clip_01K1EGA0G355C9A0NRMQF4TK3H/thumbnail.webp",
     "duration": "0:30",
     "published_at": "2025-07-30T20:28:28.204285Z",
-    "views": 6,
+    "views": 7,
     "vibe": "highlight",
-    "featured": false
+    "featured": false,
+    "video_url": "https://clips.kick.com/clips/c4/clip_01K1EGA0G355C9A0NRMQF4TK3H/playlist.m3u8"
   },
   {
     "platform": "kick",
@@ -39,7 +41,8 @@
     "published_at": "2025-07-16T17:47:47.751128Z",
     "views": 4,
     "vibe": "highlight",
-    "featured": false
+    "featured": false,
+    "video_url": "https://clips.kick.com/clips/c5/clip_01K0A5G45837G797X086VW9SGJ/playlist.m3u8"
   },
   {
     "platform": "kick",
@@ -53,7 +56,8 @@
     "published_at": "2025-07-16T04:46:58.35842Z",
     "views": 8,
     "vibe": "highlight",
-    "featured": false
+    "featured": false,
+    "video_url": "https://clips.kick.com/clips/8e/clip_01K08RRPGJ2FNHZA222XEPTTHX/playlist.m3u8"
   },
   {
     "platform": "kick",
@@ -67,7 +71,8 @@
     "published_at": "2025-07-08T00:09:45.97063Z",
     "views": 6,
     "vibe": "highlight",
-    "featured": false
+    "featured": false,
+    "video_url": "https://clips.kick.com/clips/63/clip_01JZKNVTCYFFK25D50CC7Q1219/playlist.m3u8"
   },
   {
     "platform": "kick",
@@ -81,7 +86,8 @@
     "published_at": "2025-07-07T23:56:19.761764Z",
     "views": 6,
     "vibe": "highlight",
-    "featured": false
+    "featured": false,
+    "video_url": "https://clips.kick.com/clips/c5/clip_01JZKN2Z7ET0ZN5HKA3CFCRBAR/playlist.m3u8"
   },
   {
     "platform": "kick",
@@ -95,7 +101,8 @@
     "published_at": "2025-07-07T23:52:39.717823Z",
     "views": 11,
     "vibe": "highlight",
-    "featured": false
+    "featured": false,
+    "video_url": "https://clips.kick.com/clips/4b/clip_01JZKMW5NZGJ2CEF4X0B73PMAD/playlist.m3u8"
   },
   {
     "platform": "kick",
@@ -109,7 +116,8 @@
     "published_at": "2025-07-06T04:05:26.167961Z",
     "views": 12,
     "vibe": "highlight",
-    "featured": false
+    "featured": false,
+    "video_url": "https://clips.kick.com/clips/f1/clip_01JZEYHNDCEQ6RN33YQ3KA1W4H/playlist.m3u8"
   },
   {
     "platform": "kick",
@@ -123,7 +131,8 @@
     "published_at": "2025-07-06T03:59:29.888192Z",
     "views": 6,
     "vibe": "highlight",
-    "featured": false
+    "featured": false,
+    "video_url": "https://clips.kick.com/clips/bb/clip_01JZEY6PK05YY9K1YYJPZCGBRX/playlist.m3u8"
   },
   {
     "platform": "kick",
@@ -137,7 +146,8 @@
     "published_at": "2025-07-02T02:37:28.020286Z",
     "views": 4,
     "vibe": "highlight",
-    "featured": false
+    "featured": false,
+    "video_url": "https://clips.kick.com/clips/87/clip_01JZ4FXHR11YJT2AD72MT34WCK/playlist.m3u8"
   },
   {
     "platform": "kick",
@@ -151,7 +161,8 @@
     "published_at": "2025-06-22T02:46:49.449343Z",
     "views": 18,
     "vibe": "highlight",
-    "featured": false
+    "featured": false,
+    "video_url": "https://clips.kick.com/clips/6e/clip_01JYARFPJJQW8ARY5A0PM7KYAT/playlist.m3u8"
   },
   {
     "platform": "kick",
@@ -165,7 +176,8 @@
     "published_at": "2025-06-18T02:12:21.752129Z",
     "views": 16,
     "vibe": "highlight",
-    "featured": false
+    "featured": false,
+    "video_url": "https://clips.kick.com/clips/68/clip_01JY0CW5JAFA0TYYZV0F3SDX3Q/playlist.m3u8"
   },
   {
     "platform": "kick",
@@ -179,7 +191,8 @@
     "published_at": "2025-06-15T20:53:02.703103Z",
     "views": 18,
     "vibe": "highlight",
-    "featured": false
+    "featured": false,
+    "video_url": "https://clips.kick.com/clips/49/clip_01JXTNVN1FDPVD6N9MKJEJK75M/playlist.m3u8"
   },
   {
     "platform": "kick",
@@ -193,6 +206,7 @@
     "published_at": "2025-06-14T06:24:50.171828Z",
     "views": 34,
     "vibe": "highlight",
-    "featured": false
+    "featured": false,
+    "video_url": "https://clips.kick.com/clips/3c/clip_01JXPHRS5KQAQVYZ0P5N6Z5MCK/playlist.m3u8"
   }
 ]
