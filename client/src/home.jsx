@@ -2,8 +2,27 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Hls from 'hls.js';
 import { embedUrl, getJson } from './lib/api.js';
 import { fmtDate, fmtViews, metaLine, numberClips, pad3, platformLabel, vibeLabel } from './lib/format.js';
+import {
+  PhoenixLogo,
+  KickIcon,
+  TwitchIcon,
+  YouTubeIcon,
+  DiscordIcon,
+  FortniteIcon,
+  PlayIcon,
+  SearchIcon,
+  LiveRadarIcon,
+  GamepadIcon,
+  FlameIcon,
+  CrosshairsIcon,
+  BoltIcon,
+  CrownIcon,
+  LaughIcon,
+  ExternalLinkIcon,
+  ClockIcon
+} from './lib/icons.jsx';
 
-/* ---------- Small pieces (module-level: never re-created per render) ---------- */
+/* ---------- Small pieces ---------- */
 
 function SkipLink() {
   return <a className="skip" href="#main">Skip to content</a>;
@@ -14,7 +33,8 @@ function Header({ gamerTag }) {
   return (
     <header className="bar">
       <a className="brand" href="#home" aria-label={`${gamerTag || 'Dark Phoneix'}, back to top`}>
-        <span className="rec" aria-hidden="true"></span>{tag}
+        <PhoenixLogo size={32} className="brand-icon" />
+        <span className="brand-text">{tag}</span>
       </a>
       <nav aria-label="Primary">
         <a href="#home">Home</a>
@@ -30,13 +50,23 @@ function LiveStrip({ status, twitchUrl, kickUrl }) {
   if (!status?.live) return null;
   const viewers = Number(status.viewers || 0).toLocaleString();
   const isKick = status.platform === 'kick';
-  const liveUrl = isKick ? (kickUrl || 'https://kick.com') : (twitchUrl || 'https://twitch.tv/');
+  const liveUrl = isKick ? (kickUrl || 'https://kick.com/dark-phoneix') : (twitchUrl || 'https://twitch.tv/');
   const livePlatform = isKick ? 'Kick' : 'Twitch';
   return (
     <a id="onair" className="onair" href={liveUrl} target="_blank" rel="noopener noreferrer">
-      <span className="onair-tag"><span className="rec" aria-hidden="true"></span>LIVE NOW</span>
-      <span className="onair-detail">{status.game ? `Playing ${status.game}. ` : ''}{viewers} watching</span>
-      <span className="onair-cta">Watch on {livePlatform} →</span>
+      <span className="onair-tag">
+        <span className="onair-pulse">
+          <LiveRadarIcon size={18} />
+        </span>
+        LIVE ON {livePlatform}
+      </span>
+      <span className="onair-detail">
+        {status.game ? `Playing ${status.game}. ` : ''}{viewers} watching now
+        {status.title ? ` • "${status.title}"` : ''}
+      </span>
+      <span className="onair-cta">
+        Watch stream <ExternalLinkIcon size={13} />
+      </span>
     </a>
   );
 }
@@ -46,16 +76,45 @@ function Hero({ cfg }) {
   const tag = cfg.gamerTag || 'Dark Phoneix';
   return (
     <section id="home" className="hero" aria-labelledby="gamer-tag">
-      <p className="mono hero-eyebrow">Clip log / Twitch + YouTube</p>
-      <h1 id="gamer-tag" className="hero-tag">{tag}</h1>
+      <div>
+        <p className="mono hero-eyebrow">
+          <GamepadIcon size={14} /> CLIPS VAULT & STREAM ARCHIVE
+        </p>
+        <div className="hero-brand-wrap">
+          <PhoenixLogo size={84} className="hero-avatar-logo" />
+          <h1 id="gamer-tag" className="hero-tag">{tag}</h1>
+        </div>
+      </div>
       <div className="hero-side">
         {cfg.tagline ? <p className="hero-tagline">{cfg.tagline}</p> : null}
-        {cfg.fortniteTag ? <p className="mono dim" style={{ marginBottom: 16 }}>Fortnite: {cfg.fortniteTag}</p> : null}
+        {cfg.fortniteTag ? (
+          <div className="fortnite-pill mono">
+            <FortniteIcon size={16} />
+            <span className="dim">EPIC / FORTNITE:</span>
+            <strong>{cfg.fortniteTag}</strong>
+          </div>
+        ) : null}
         <div className="links">
-          {s.youtube ? <a className="btn btn-red" href={s.youtube} target="_blank" rel="noopener noreferrer">YouTube</a> : null}
-          {s.twitch ? <a className="btn" href={s.twitch} target="_blank" rel="noopener noreferrer">Twitch</a> : null}
-          {s.discord ? <a className="btn" href={s.discord} target="_blank" rel="noopener noreferrer">Discord</a> : null}
-          {s.kick ? <a className="btn btn-gold" href={s.kick} target="_blank" rel="noopener noreferrer">Kick</a> : null}
+          {s.kick ? (
+            <a className="btn btn-kick" href={s.kick} target="_blank" rel="noopener noreferrer">
+              <KickIcon size={18} /> Kick
+            </a>
+          ) : null}
+          {s.youtube ? (
+            <a className="btn btn-youtube" href={s.youtube} target="_blank" rel="noopener noreferrer">
+              <YouTubeIcon size={18} /> YouTube
+            </a>
+          ) : null}
+          {s.twitch ? (
+            <a className="btn btn-twitch" href={s.twitch} target="_blank" rel="noopener noreferrer">
+              <TwitchIcon size={18} /> Twitch
+            </a>
+          ) : null}
+          {s.discord ? (
+            <a className="btn btn-discord" href={s.discord} target="_blank" rel="noopener noreferrer">
+              <DiscordIcon size={18} /> Discord
+            </a>
+          ) : null}
         </div>
       </div>
     </section>
@@ -129,7 +188,10 @@ function Featured({ clip, logNo }) {
   return (
     <section id="featured" className="featured" aria-labelledby="featured-label">
       <div className="section-label">
-        <h2 id="featured-label" className="mono">Featured</h2>
+        <div className="section-title-wrap">
+          <CrownIcon size={18} className="dim" />
+          <h2 id="featured-label" className="mono">Featured highlight</h2>
+        </div>
         <span id="featured-index" className="mono dim">{logNo}</span>
       </div>
       <div className="frame"><Player clip={clip} autoplay={false} /></div>
@@ -137,34 +199,86 @@ function Featured({ clip, logNo }) {
         <h3 className="featured-title">{clip.title}</h3>
         <div>
           <p className="mono meta">{[metaLine(clip), fmtViews(clip.views)].filter(Boolean).join(' / ')}</p>
-          {clip.url ? <a className="textlink" href={clip.url} target="_blank" rel="noopener noreferrer">Open original →</a> : null}
+          {clip.url ? (
+            <a className="textlink" href={clip.url} target="_blank" rel="noopener noreferrer">
+              Open original on {platformLabel(clip.platform)} <ExternalLinkIcon size={13} />
+            </a>
+          ) : null}
         </div>
       </div>
     </section>
   );
 }
 
-function ClipCard({ clip, logNo, onOpen }) {
+function CardThumbnail({ clip, logNo, index }) {
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+
+  return (
+    <span className="thumb">
+      {!loaded && !error && <span className="thumb-shimmer" aria-hidden="true" />}
+      {(!clip.thumbnail || error) && (
+        <span className="thumb-fallback" aria-hidden="true">
+          <PhoenixLogo size={48} />
+          <span className="fallback-game">{clip.game || 'DARK PHONEIX'}</span>
+        </span>
+      )}
+      {clip.thumbnail && !error && (
+        <img
+          src={clip.thumbnail}
+          alt={clip.title || ''}
+          loading={index < 6 ? 'eager' : 'lazy'}
+          decoding="async"
+          onLoad={() => setLoaded(true)}
+          onError={() => setError(true)}
+          className={`thumb-img ${loaded ? 'is-loaded' : ''}`}
+        />
+      )}
+      <span className="idx">{logNo}</span>
+      {clip.duration ? (
+        <span className="dur">
+          <ClockIcon size={11} /> {clip.duration}
+        </span>
+      ) : null}
+      <span className="play" aria-hidden="true">
+        <span className="play-badge">
+          <PlayIcon size={13} /> PLAY
+        </span>
+      </span>
+    </span>
+  );
+}
+
+function ClipCard({ clip, logNo, index, onOpen }) {
   return (
     <li>
       <button type="button" className="clip" onClick={() => onOpen(clip.id)} aria-label={`Play ${clip.title}`}>
-        <span className="thumb">
-          <span className="thumb-fallback" aria-hidden="true">{clip.game || ''}</span>
-          {clip.thumbnail ? (
-            <img src={clip.thumbnail} alt="" loading="lazy" onError={e => e.currentTarget.remove()} />
-          ) : null}
-          <span className="idx">{logNo}</span>
-          {clip.duration ? <span className="dur">{clip.duration}</span> : null}
-          <span className="play" aria-hidden="true"></span>
-        </span>
+        <CardThumbnail clip={clip} logNo={logNo} index={index} />
         <span className="card-body">
           <span className="tags">
-            <span className={`tag${clip.platform === 'youtube' ? ' yt' : clip.platform === 'kick' ? ' kick' : ''}`}>{platformLabel(clip.platform)}</span>
-            <span className="vibe">{vibeLabel(clip.vibe)}</span>
+            <span className={`tag tag-${clip.platform}`}>
+              {clip.platform === 'kick' && <KickIcon size={12} />}
+              {clip.platform === 'twitch' && <TwitchIcon size={12} />}
+              {clip.platform === 'youtube' && <YouTubeIcon size={12} />}
+              <span>{platformLabel(clip.platform)}</span>
+            </span>
+            <span className={`vibe-badge vibe-${String(clip.vibe || '').toLowerCase()}`}>
+              {clip.vibe === 'clutch' && <FlameIcon size={12} />}
+              {clip.vibe === 'ace' && <CrosshairsIcon size={12} />}
+              {clip.vibe === 'epic' && <BoltIcon size={12} />}
+              {clip.vibe === 'highlight' && <CrownIcon size={12} />}
+              {clip.vibe === 'funny' && <LaughIcon size={12} />}
+              <span>{vibeLabel(clip.vibe)}</span>
+            </span>
           </span>
           <span className="card-title">{clip.title}</span>
           <span className="card-meta mono">
-            {clip.game || ''}{[fmtDate(clip.published_at), fmtViews(clip.views)].filter(Boolean).join(' / ') ? ` / ${[fmtDate(clip.published_at), fmtViews(clip.views)].filter(Boolean).join(' / ')}` : ''}
+            <span className="game-label">
+              <GamepadIcon size={12} /> {clip.game || 'Variety'}
+            </span>
+            {[fmtDate(clip.published_at), fmtViews(clip.views)].filter(Boolean).length > 0 && (
+              <span> / {[fmtDate(clip.published_at), fmtViews(clip.views)].filter(Boolean).join(' / ')}</span>
+            )}
           </span>
         </span>
       </button>
@@ -192,7 +306,7 @@ function FilterWall({ clips, numbers, loading, onOpen }) {
 
   const platforms = useMemo(() => {
     const hasKick = clips.some(c => c.platform === 'kick');
-    return hasKick ? ['all', 'twitch', 'youtube', 'kick'] : ['all', 'twitch', 'youtube'];
+    return hasKick ? ['all', 'kick', 'twitch', 'youtube'] : ['all', 'twitch', 'youtube'];
   }, [clips]);
 
   const games = useMemo(
@@ -200,7 +314,6 @@ function FilterWall({ clips, numbers, loading, onOpen }) {
     [clips]
   );
 
-  // Derived during render: no extra state, no effect.
   const q = search.trim().toLowerCase();
   const visible = clips.filter(
     c =>
@@ -214,13 +327,16 @@ function FilterWall({ clips, numbers, loading, onOpen }) {
   return (
     <section id="clips" className="wall" aria-labelledby="wall-title">
       <div className="section-label">
-        <h2 id="wall-title" className="mono">The log</h2>
+        <div className="section-title-wrap">
+          <PhoenixLogo size={20} />
+          <h2 id="wall-title" className="mono">The log</h2>
+        </div>
         <span className="mono dim" role="status" aria-live="polite">{loading ? '' : `${visible.length} of ${clips.length} clips`}</span>
       </div>
 
       {allPlaceholders ? (
         <p className="demo-note mono">
-          Placeholder clips. Ryan pastes real links in <code>/admin</code> and these disappear.
+          Placeholder clips. Add real links in <code>/admin</code> to populate.
         </p>
       ) : null}
 
@@ -229,20 +345,28 @@ function FilterWall({ clips, numbers, loading, onOpen }) {
           <div className="group" role="group" aria-label="Platform">
             {platforms.map(p => (
               <button key={p} type="button" className="chip" aria-pressed={platform === p} onClick={() => setPlatform(p)}>
-                {p === 'all' ? 'All' : platformLabel(p)}
+                {p === 'kick' && <KickIcon size={14} />}
+                {p === 'twitch' && <TwitchIcon size={14} />}
+                {p === 'youtube' && <YouTubeIcon size={14} />}
+                <span>{p === 'all' ? 'All Platforms' : platformLabel(p)}</span>
               </button>
             ))}
           </div>
           <div className="fields">
-            <label className="field">
-              <span className="sr">Search clips</span>
-              <input type="search" placeholder="Search" autoComplete="off" value={search} onChange={e => setSearch(e.target.value)} />
-            </label>
-            {search ? <button type="button" className="chip" onClick={() => setSearch('')} aria-label="Clear search">✕</button> : null}
+            <div className="search-field">
+              <span className="search-icon-badge" aria-hidden="true">
+                <SearchIcon size={15} />
+              </span>
+              <label>
+                <span className="sr">Search clips</span>
+                <input type="search" placeholder="Search clips or games..." autoComplete="off" value={search} onChange={e => setSearch(e.target.value)} />
+              </label>
+              {search ? <button type="button" className="chip" onClick={() => setSearch('')} aria-label="Clear search">✕</button> : null}
+            </div>
             <label className="field">
               <span className="sr">Filter by game</span>
               <select value={game} onChange={e => setGame(e.target.value)}>
-                <option value="all">All games</option>
+                <option value="all">🎮 All games ({games.length})</option>
                 {games.map(g => <option key={g} value={g}>{g}</option>)}
               </select>
             </label>
@@ -252,7 +376,12 @@ function FilterWall({ clips, numbers, loading, onOpen }) {
         <div className="group vibes" role="group" aria-label="Vibe">
           {VIBES.map(v => (
             <button key={v} type="button" className="chip" aria-pressed={vibe === v} onClick={() => setVibe(v)}>
-              {v === 'all' ? 'All' : vibeLabel(v)}
+              {v === 'clutch' && <FlameIcon size={13} />}
+              {v === 'ace' && <CrosshairsIcon size={13} />}
+              {v === 'epic' && <BoltIcon size={13} />}
+              {v === 'highlight' && <CrownIcon size={13} />}
+              {v === 'funny' && <LaughIcon size={13} />}
+              <span>{v === 'all' ? 'All Vibes' : vibeLabel(v)}</span>
             </button>
           ))}
         </div>
@@ -261,9 +390,11 @@ function FilterWall({ clips, numbers, loading, onOpen }) {
       {loading ? <SkeletonGrid /> : (
         <>
           <ul className="grid">
-            {visible.map(c => <ClipCard key={c.id} clip={c} logNo={pad3(numbers.get(c.id))} onOpen={onOpen} />)}
+            {visible.map((c, idx) => (
+              <ClipCard key={c.id} clip={c} logNo={pad3(numbers.get(c.id))} index={idx} onOpen={onOpen} />
+            ))}
           </ul>
-          {visible.length === 0 ? <p className="empty mono">Nothing matches. Clear a filter.</p> : null}
+          {visible.length === 0 ? <p className="empty mono">Nothing matches your search or filter. Clear to view all.</p> : null}
         </>
       )}
     </section>
@@ -273,18 +404,37 @@ function FilterWall({ clips, numbers, loading, onOpen }) {
 function About({ cfg }) {
   return (
     <section id="about" className="about" aria-labelledby="about-title">
-      <div className="section-label"><h2 id="about-title" className="mono">About</h2></div>
+      <div className="section-label">
+        <div className="section-title-wrap">
+          <PhoenixLogo size={20} />
+          <h2 id="about-title" className="mono">About Dark Phoneix</h2>
+        </div>
+      </div>
       <div className="about-grid">
         <div>
           {cfg.bio ? <p className="bio">{cfg.bio}</p> : null}
           <ul className="games" aria-label="Main games">
-            {(cfg.primaryGames || []).map(g => <li key={g}>{g}</li>)}
+            {(cfg.primaryGames || []).map(g => (
+              <li key={g}>
+                <GamepadIcon size={14} /> {g}
+              </li>
+            ))}
           </ul>
-          {cfg.fortniteTag ? <p className="mono dim" style={{ marginTop: 16 }}>Fortnite: {cfg.fortniteTag}</p> : null}
+          {cfg.fortniteTag ? (
+            <p className="mono dim" style={{ marginTop: 18, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <FortniteIcon size={15} /> Fortnite Clan: <strong>{cfg.fortniteTag}</strong>
+            </p>
+          ) : null}
         </div>
         <dl className="schedule" aria-label="Stream schedule">
           {(cfg.schedule || []).map((r, i) => (
-            <div key={i}><dt>{r.days}</dt><dd><b>{r.time}</b>{r.activity}</dd></div>
+            <div key={i}>
+              <dt>{r.days}</dt>
+              <dd>
+                <b><ClockIcon size={12} /> {r.time}</b>
+                {r.activity}
+              </dd>
+            </div>
           ))}
         </dl>
       </div>
@@ -296,10 +446,19 @@ function Footer({ cfg }) {
   const socials = Object.entries(cfg.socials || {}).filter(([, href]) => href);
   return (
     <footer className="foot">
-      <span className="mono dim">© {new Date().getFullYear()} {cfg.gamerTag || ''}</span>
+      <div className="foot-brand">
+        <PhoenixLogo size={24} />
+        <span className="mono dim">© {new Date().getFullYear()} {cfg.gamerTag || 'Dark Phoneix'} • All Rights Reserved</span>
+      </div>
       <nav aria-label="Social" className="foot-links">
         {socials.map(([k, href]) => (
-          <a key={k} href={href} target="_blank" rel="noopener noreferrer">{k}</a>
+          <a key={k} href={href} target="_blank" rel="noopener noreferrer">
+            {k === 'kick' && <KickIcon size={14} />}
+            {k === 'youtube' && <YouTubeIcon size={14} />}
+            {k === 'twitch' && <TwitchIcon size={14} />}
+            {k === 'discord' && <DiscordIcon size={14} />}
+            <span>{k}</span>
+          </a>
         ))}
       </nav>
     </footer>
@@ -337,7 +496,11 @@ function PlayerModal({ clip, logNo, onClose }) {
           <div className="frame"><Player key={clip.id} clip={clip} autoplay={true} /></div>
           <div className="modal-foot">
             <h3 id="modal-title">{clip.title}</h3>
-            {clip.url ? <a className="textlink" href={clip.url} target="_blank" rel="noopener noreferrer">Open original →</a> : null}
+            {clip.url ? (
+              <a className="textlink" href={clip.url} target="_blank" rel="noopener noreferrer">
+                Open original on {platformLabel(clip.platform)} <ExternalLinkIcon size={13} />
+              </a>
+            ) : null}
           </div>
         </div>
       ) : null}
@@ -358,11 +521,10 @@ export function Home() {
   const [clips, setClips] = useState([]);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
-  const [modalId, setModalId] = useState(hashClipId); // lazy init: read hash once
+  const [modalId, setModalId] = useState(hashClipId);
 
   useEffect(() => {
     let cancelled = false;
-    // One parallel burst: config, live status, clips.
     Promise.all([getJson('/api/config', {}), getJson('/api/status', null), getJson('/api/clips', [])])
       .then(([c, s, v]) => {
         if (cancelled) return;
@@ -377,7 +539,7 @@ export function Home() {
   }, []);
 
   useEffect(() => {
-    if (cfg.gamerTag) document.title = `${cfg.gamerTag} — Clip Log`;
+    if (cfg.gamerTag) document.title = `${cfg.gamerTag} — Stream & Clip Vault`;
   }, [cfg.gamerTag]);
 
   const numbers = useMemo(() => numberClips(clips), [clips]);
