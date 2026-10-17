@@ -33,7 +33,7 @@ function Header({ gamerTag }) {
   return (
     <header className="bar">
       <a className="brand" href="#home" aria-label={`${gamerTag || 'Dark Phoneix'}, back to top`}>
-        <PhoenixLogo size={32} className="brand-icon" />
+        <PhoenixLogo size={36} className="brand-icon" />
         <span className="brand-text">{tag}</span>
       </a>
       <nav aria-label="Primary">
@@ -81,7 +81,10 @@ function Hero({ cfg }) {
           <GamepadIcon size={14} /> CLIPS VAULT & STREAM ARCHIVE
         </p>
         <div className="hero-brand-wrap">
-          <PhoenixLogo size={84} className="hero-avatar-logo" />
+          <div className="hero-avatar-wrap">
+            <PhoenixLogo size={108} className="hero-avatar-logo" />
+            <div className="hero-avatar-halo" aria-hidden="true" />
+          </div>
           <h1 id="gamer-tag" className="hero-tag">{tag}</h1>
         </div>
       </div>

@@ -6,6 +6,31 @@ import React from 'react';
  */
 
 export function PhoenixLogo({ size = 32, className = '' }) {
+  const [imgErr, setImgErr] = React.useState(false);
+
+  if (!imgErr) {
+    return (
+      <img
+        src="/logo.png"
+        alt="Dark Phoneix Logo"
+        width={size}
+        height={size}
+        onError={() => setImgErr(true)}
+        className={`phoenix-avatar-emblem ${className}`}
+        style={{
+          width: size,
+          height: size,
+          borderRadius: '50%',
+          objectFit: 'cover',
+          display: 'inline-block',
+          border: '1.5px solid var(--gold)',
+          boxShadow: '0 0 14px var(--gold-glow), 0 0 6px var(--flame-glow)',
+          flexShrink: 0
+        }}
+      />
+    );
+  }
+
   return (
     <svg
       width={size}
@@ -18,12 +43,12 @@ export function PhoenixLogo({ size = 32, className = '' }) {
     >
       <defs>
         <linearGradient id="phxGrad" x1="4" y1="44" x2="44" y2="4" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#ff1a1a" />
-          <stop offset="50%" stopColor="#ff5500" />
-          <stop offset="100%" stopColor="#ffcc00" />
+          <stop offset="0%" stopColor="#e61919" />
+          <stop offset="50%" stopColor="#ff4500" />
+          <stop offset="100%" stopColor="#d4af37" />
         </linearGradient>
         <filter id="phxGlow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="0" stdDeviation="2" floodColor="#ff3300" floodOpacity="0.6" />
+          <feDropShadow dx="0" dy="0" stdDeviation="2" floodColor="#e61919" floodOpacity="0.6" />
         </filter>
       </defs>
       {/* Outer Wings */}
@@ -35,12 +60,12 @@ export function PhoenixLogo({ size = 32, className = '' }) {
       {/* Core Inner Body */}
       <path
         d="M24 14L27 21L33 24L28 29L29 36L24 33L19 36L20 29L15 24L21 21L24 14Z"
-        fill="#0b0d10"
+        fill="#07080a"
       />
       {/* Center Ember Heart */}
       <path
         d="M24 20L26 25L24 28L22 25L24 20Z"
-        fill="#ffcc00"
+        fill="#d4af37"
       />
     </svg>
   );

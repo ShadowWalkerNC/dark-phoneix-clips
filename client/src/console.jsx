@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getJson, postJson } from './lib/api.js';
 import { fmtDate, fmtViews, platformLabel, vibeLabel } from './lib/format.js';
+import { PhoenixLogo } from './lib/icons.jsx';
 
 /* ---------- Pieces ---------- */
 
@@ -273,7 +274,10 @@ export function Console() {
       <>
         <a className="skip" href="#main">Skip to content</a>
         <header className="bar">
-          <a className="brand" href="/"><span className="rec" aria-hidden="true"></span>DARK PHONEIX</a>
+          <a className="brand" href="/">
+            <PhoenixLogo size={32} className="brand-icon" />
+            <span className="brand-text">DARK PHONEIX</span>
+          </a>
           <nav aria-label="Primary">
             <a href="/">View site</a>
             <a href="/admin" aria-current="page">Admin</a>
@@ -330,7 +334,10 @@ export function Console() {
     <>
       <a className="skip" href="#main">Skip to content</a>
       <header className="bar">
-        <a className="brand" href="/"><span className="rec" aria-hidden="true"></span>DARK PHONEIX</a>
+        <a className="brand" href="/">
+          <PhoenixLogo size={32} className="brand-icon" />
+          <span className="brand-text">DARK PHONEIX</span>
+        </a>
         <nav aria-label="Primary">
           <a href="/">View site</a>
           <a href="/admin" aria-current="page">Admin</a>
