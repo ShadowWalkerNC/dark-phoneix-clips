@@ -70,6 +70,32 @@ function LiveStrip({ status, kickUrl }) {
   );
 }
 
+function DiscordPill({ tag }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    if (tag && typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(tag).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }).catch(() => {});
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      className="discord-pill mono"
+      onClick={handleCopy}
+      title={copied ? 'Copied to clipboard!' : `Discord: ${tag} (Click to copy)`}
+      aria-label={`Discord username: ${tag}. Click to copy to clipboard.`}
+    >
+      <DiscordIcon size={15} />
+      <span className="dim">DISCORD:</span>
+      <strong>{copied ? 'COPIED!' : tag}</strong>
+    </button>
+  );
+}
+
 function Hero({ cfg }) {
   const s = cfg.socials || {};
   const tag = cfg.gamerTag || 'Dark Phoneix';
@@ -113,13 +139,7 @@ function Hero({ cfg }) {
               <ExternalLinkIcon size={11} />
             </a>
           ) : null}
-          {cfg.discordTag ? (
-            <div className="discord-pill mono" title={`Discord: ${cfg.discordTag}`}>
-              <DiscordIcon size={15} />
-              <span className="dim">DISCORD:</span>
-              <strong>{cfg.discordTag}</strong>
-            </div>
-          ) : null}
+          {cfg.discordTag ? <DiscordPill tag={cfg.discordTag} /> : null}
         </div>
         <div className="links">
           {s.kick ? (
@@ -606,7 +626,7 @@ function PlayerModal({ clip, logNo, onClose }) {
         <div className="modal-inner">
           <div className="modal-head">
             <p className="mono meta">{logNo} / {metaLine(clip)}</p>
-            <button type="button" className="close" onClick={onClose}>Close ✕</button>
+            <button type="button" className="close" onClick={onClose} aria-label="Close clip video modal">Close ✕</button>
           </div>
           <div className="frame"><Player key={clip.id} clip={clip} autoplay={true} /></div>
           <div className="modal-foot">

@@ -40,6 +40,15 @@ html { background: var(--ink); color: var(--bone); scroll-behavior: smooth; scro
 body { font-family: var(--body); line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column; }
 main { flex: 1; }
 
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Film grain: subtle cinematic texture. */
 body::before {
   content: '';
@@ -214,7 +223,14 @@ img { display: block; max-width: 100%; }
   background: rgba(88, 101, 242, 0.1); border: 1px solid rgba(88, 101, 242, 0.4);
   color: #9baaff; font-size: .78rem; letter-spacing: .08em;
   text-transform: uppercase; width: fit-content;
+  cursor: pointer; transition: all .15s ease;
+  user-select: none;
 }
+.discord-pill:hover {
+  background: rgba(88, 101, 242, 0.22); border-color: rgba(88, 101, 242, 0.8);
+  color: #fff; transform: translateY(-1px); box-shadow: 0 0 12px rgba(88, 101, 242, 0.35);
+}
+.discord-pill:active { transform: translateY(0); }
 .discord-pill strong { color: #fff; letter-spacing: .08em; }
 
 .links { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -314,7 +330,7 @@ img { display: block; max-width: 100%; }
 .group { display: flex; flex-wrap: wrap; gap: 6px; }
 .vibes { margin-bottom: 0; }
 .chip {
-  min-height: 40px; padding: 0 14px; background: transparent; cursor: pointer;
+  min-height: 44px; padding: 0 14px; background: transparent; cursor: pointer;
   font-family: var(--mono); font-size: .78rem; text-transform: uppercase; letter-spacing: .08em;
   border: 1px solid var(--line); color: var(--mute); display: inline-flex; align-items: center; gap: 6px;
   transition: all .15s ease;
@@ -326,7 +342,7 @@ img { display: block; max-width: 100%; }
 .search-field { position: relative; display: flex; align-items: center; }
 .search-icon-badge { position: absolute; left: 12px; color: var(--mute); pointer-events: none; }
 .field input, .field select {
-  min-height: 40px; padding: 0 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 0;
+  min-height: 44px; padding: 0 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 0;
   font-family: var(--mono); font-size: .8rem;
   transition: border-color .15s ease;
 }
@@ -482,7 +498,7 @@ img { display: block; max-width: 100%; }
   color: var(--mute); font-size: .95rem; line-height: 1.5; max-width: 44ch;
 }
 .mini-btn {
-  min-height: 38px; padding: 0 16px; font-size: .76rem; width: fit-content; margin-top: 8px;
+  min-height: 44px; padding: 0 18px; font-size: .78rem; width: fit-content; margin-top: 8px;
 }
 
 .schedule > div { display: grid; grid-template-columns: 8.5rem 1fr; gap: 4px 16px; padding: 14px 0; border-bottom: 1px solid var(--line); }
@@ -503,7 +519,7 @@ img { display: block; max-width: 100%; }
 .modal-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
 .modal-head .meta { margin: 0; }
 .close {
-  min-height: 40px; padding: 0 16px; background: transparent; border: 1px solid var(--gold); color: var(--gold-bright); cursor: pointer;
+  min-height: 44px; padding: 0 18px; background: transparent; border: 1px solid var(--gold); color: var(--gold-bright); cursor: pointer;
   font-family: var(--mono); font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; transition: all .15s;
 }
 .close:hover { background: var(--red); border-color: var(--red); color: #fff; box-shadow: 0 0 12px var(--flame-glow); }
@@ -516,7 +532,7 @@ img { display: block; max-width: 100%; }
 .foot-links { display: flex; flex-wrap: wrap; gap: 6px; }
 .foot-links a {
   font-family: var(--mono); font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: var(--mute);
-  padding: 6px 14px; min-height: 40px; display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px; min-height: 44px; display: inline-flex; align-items: center; gap: 6px;
   border: 1px solid transparent; transition: all .15s;
 }
 .foot-links a:hover { color: var(--gold-bright); border-color: var(--gold); }
