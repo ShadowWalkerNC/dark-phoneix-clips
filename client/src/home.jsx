@@ -114,7 +114,7 @@ function Hero({ cfg }) {
             </a>
           ) : null}
           {cfg.discordTag ? (
-            <div className="discord-pill mono" title="Discord: darkphoneix / darkphoneix01398">
+            <div className="discord-pill mono" title={`Discord: ${cfg.discordTag}`}>
               <DiscordIcon size={15} />
               <span className="dim">DISCORD:</span>
               <strong>{cfg.discordTag}</strong>

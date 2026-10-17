@@ -22,7 +22,7 @@ npm run dev
 npm test
 
 # 4. Open the Admin console at http://localhost:3000/admin
-# Login: Admin / Admins2027! (override with ADMIN_USER + ADMIN_PASS)
+# Login: Set your ADMIN_USER and ADMIN_PASS in your private .env or Railway Variables
 ```
 
 ---
@@ -78,7 +78,7 @@ To tag a clip with a vibe (`clutch`, `ace`, `funny`, `epic`) or feature it in th
 ```bash
 curl -X POST http://localhost:3000/api/curate \
   -H "Content-Type: application/json" \
-  -H "x-admin-key: curate-ryan-secret-key" \
+  -H "x-admin-key: <YOUR_ADMIN_KEY>" \
   -d '{
     "clipId": "AwkwardHelplessSalamanderSwiftRage",
     "vibe": "clutch",

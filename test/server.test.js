@@ -14,8 +14,8 @@ const path = require('node:path');
 
 // Isolate data BEFORE the app loads; tests must never touch real data/.
 process.env.DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'ryan-test-'));
-process.env.ADMIN_KEY = 'curate-ryan-secret-key';
-process.env.TWITCH_EVENTSUB_SECRET = 'ryan-twitch-secret-key';
+process.env.ADMIN_KEY = 'test-mock-admin-key-456';
+process.env.TWITCH_EVENTSUB_SECRET = 'test-mock-twitch-secret-123';
 delete process.env.YOUTUBE_WEBSUB_SECRET;
 
 const app = require('../server');
@@ -24,8 +24,8 @@ const { parseClipUrl } = require('../lib/syncService');
 let server;
 let baseUrl;
 const PORT = 3456;
-const ADMIN_KEY = process.env.ADMIN_KEY || 'curate-ryan-secret-key';
-const TWITCH_SECRET = process.env.TWITCH_EVENTSUB_SECRET || 'ryan-twitch-secret-key';
+const ADMIN_KEY = process.env.ADMIN_KEY || 'test-mock-admin-key-456';
+const TWITCH_SECRET = process.env.TWITCH_EVENTSUB_SECRET || 'test-mock-twitch-secret-123';
 
 test.before(async () => {
   await new Promise(resolve => {

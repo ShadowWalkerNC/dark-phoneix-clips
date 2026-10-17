@@ -84,7 +84,7 @@ export function Console() {
   const [clips, setClips] = useState([]);
 
   // Login form
-  const [user, setUser] = useState('Admin');
+  const [user, setUser] = useState('');
   const [pass, setPass] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [loginMsg, setLoginMsg] = useState('');
@@ -335,7 +335,7 @@ export function Console() {
   const yt = setup?.youtube || {};
   const checklist = setup ? (
     <ul className="check">
-      {setup.defaultCredentials ? <CheckRow ok={false} label="Change the default Admin password" hint="Set ADMIN_USER + ADMIN_PASS in Railway Variables" /> : null}
+      {setup.defaultCredentials ? <CheckRow ok={false} label="Set your secret Admin password" hint="Configure ADMIN_USER + ADMIN_PASS in Railway Variables" /> : null}
       <CheckRow ok={Boolean(setup.profile.gamerTag && setup.profile.tagline && setup.profile.bio)} label="Page profile filled in" hint="Page tab" />
       <CheckRow ok={Boolean(setup.socials.twitch && setup.socials.youtube && setup.socials.discord && setup.socials.kick)} label="Real Twitch / YouTube / Discord / Kick links" hint="Replace the /ryan placeholders in the Page tab" />
       <CheckRow ok={Boolean(tw.clientId && tw.clientSecret && tw.broadcasterId)} label="Twitch app keys in Railway Variables" hint="TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, TWITCH_BROADCASTER_ID" />
@@ -400,7 +400,7 @@ export function Console() {
                 <label className="afield">Fortnite.gg profile URL <input type="url" placeholder="https://fortnite.gg/stats?player=DarkPhoneix_LDG" value={profile.fortniteGgUrl} onChange={set('fortniteGgUrl')} /></label>
               </div>
               <div className="frow">
-                <label className="afield">Discord username / tag <input type="text" maxLength={60} placeholder="darkphoneix / darkphoneix01398" value={profile.discordTag} onChange={set('discordTag')} /></label>
+                <label className="afield">Discord username / tag <input type="text" maxLength={60} placeholder="darkphoenix" value={profile.discordTag} onChange={set('discordTag')} /></label>
                 <label className="afield">Twitch channel (no @) <input type="text" maxLength={120} value={profile.twitchChannel} onChange={set('twitchChannel')} /></label>
               </div>
               <div className="frow single">
