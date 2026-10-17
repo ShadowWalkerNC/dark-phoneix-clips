@@ -90,13 +90,22 @@ function Hero({ cfg }) {
       </div>
       <div className="hero-side">
         {cfg.tagline ? <p className="hero-tagline">{cfg.tagline}</p> : null}
-        {cfg.fortniteTag ? (
-          <div className="fortnite-pill mono">
-            <FortniteIcon size={16} />
-            <span className="dim">EPIC / FORTNITE:</span>
-            <strong>{cfg.fortniteTag}</strong>
-          </div>
-        ) : null}
+        <div className="gamer-pills">
+          {cfg.fortniteTag ? (
+            <div className="fortnite-pill mono">
+              <FortniteIcon size={16} />
+              <span className="dim">EPIC / FORTNITE:</span>
+              <strong>{cfg.fortniteTag}</strong>
+            </div>
+          ) : null}
+          {cfg.discordTag ? (
+            <div className="discord-pill mono" title="Discord: darkphoneix / darkphoneix01398">
+              <DiscordIcon size={16} />
+              <span className="dim">DISCORD:</span>
+              <strong>{cfg.discordTag}</strong>
+            </div>
+          ) : null}
+        </div>
         <div className="links">
           {s.kick ? (
             <a className="btn btn-kick" href={s.kick} target="_blank" rel="noopener noreferrer">
@@ -197,14 +206,30 @@ function Featured({ clip, logNo }) {
         </div>
         <span id="featured-index" className="mono dim">{logNo}</span>
       </div>
-      <div className="frame"><Player clip={clip} autoplay={false} /></div>
-      <div className="featured-caption">
-        <h3 className="featured-title">{clip.title}</h3>
-        <div>
+      <div className="featured-spotlight">
+        <div className="frame featured-frame"><Player clip={clip} autoplay={false} /></div>
+        <div className="featured-caption">
+          <div className="tags">
+            <span className={`tag tag-${clip.platform}`}>
+              {clip.platform === 'kick' && <KickIcon size={12} />}
+              {clip.platform === 'twitch' && <TwitchIcon size={12} />}
+              {clip.platform === 'youtube' && <YouTubeIcon size={12} />}
+              <span>{platformLabel(clip.platform)}</span>
+            </span>
+            <span className={`vibe-badge vibe-${String(clip.vibe || '').toLowerCase()}`}>
+              {clip.vibe === 'clutch' && <FlameIcon size={12} />}
+              {clip.vibe === 'ace' && <CrosshairsIcon size={12} />}
+              {clip.vibe === 'epic' && <BoltIcon size={12} />}
+              {clip.vibe === 'highlight' && <CrownIcon size={12} />}
+              {clip.vibe === 'funny' && <LaughIcon size={12} />}
+              <span>{vibeLabel(clip.vibe)}</span>
+            </span>
+          </div>
+          <h3 className="featured-title">{clip.title}</h3>
           <p className="mono meta">{[metaLine(clip), fmtViews(clip.views)].filter(Boolean).join(' / ')}</p>
           {clip.url ? (
-            <a className="textlink" href={clip.url} target="_blank" rel="noopener noreferrer">
-              Open original on {platformLabel(clip.platform)} <ExternalLinkIcon size={13} />
+            <a className="btn btn-featured-link" href={clip.url} target="_blank" rel="noopener noreferrer">
+              Open on {platformLabel(clip.platform)} <ExternalLinkIcon size={13} />
             </a>
           ) : null}
         </div>
@@ -426,6 +451,11 @@ function About({ cfg }) {
           {cfg.fortniteTag ? (
             <p className="mono dim" style={{ marginTop: 18, display: 'flex', alignItems: 'center', gap: 8 }}>
               <FortniteIcon size={15} /> Fortnite Clan: <strong>{cfg.fortniteTag}</strong>
+            </p>
+          ) : null}
+          {cfg.discordTag ? (
+            <p className="mono dim" style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <DiscordIcon size={15} /> Discord: <strong>{cfg.discordTag}</strong>
             </p>
           ) : null}
         </div>

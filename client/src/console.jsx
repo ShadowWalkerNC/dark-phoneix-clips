@@ -121,6 +121,7 @@ export function Console() {
       tagline: cfg.tagline || '',
       bio: cfg.bio || '',
       fortniteTag: cfg.fortniteTag || '',
+      discordTag: cfg.discordTag || '',
       games: (cfg.primaryGames || []).join(', '),
       twitch: cfg.socials?.twitch || '',
       youtube: cfg.socials?.youtube || '',
@@ -172,6 +173,7 @@ export function Console() {
         tagline: profile.tagline,
         bio: profile.bio,
         fortniteTag: profile.fortniteTag,
+        discordTag: profile.discordTag,
         primaryGames: profile.games.split(',').map(g => g.trim()).filter(Boolean),
         socials: {
           twitch: profile.twitch.trim(),
@@ -381,8 +383,9 @@ export function Console() {
               <div className="frow single">
                 <label className="afield">Page title <input type="text" maxLength={120} value={profile.title} onChange={set('title')} /></label>
               </div>
-              <div className="frow single">
+              <div className="frow">
                 <label className="afield">Fortnite tag <input type="text" maxLength={60} placeholder="Epic username" value={profile.fortniteTag} onChange={set('fortniteTag')} /></label>
+                <label className="afield">Discord user tag <input type="text" maxLength={60} placeholder="darkphoneix / darkphoneix01398" value={profile.discordTag} onChange={set('discordTag')} /></label>
               </div>
               <div className="frow single">
                 <label className="afield">Tagline <input type="text" maxLength={120} value={profile.tagline} onChange={set('tagline')} /></label>

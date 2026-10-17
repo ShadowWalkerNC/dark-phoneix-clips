@@ -173,23 +173,33 @@ img { display: block; max-width: 100%; }
 .hero-side { padding-bottom: .4rem; }
 .hero-tagline { color: var(--mute); font-size: 1.05rem; max-width: 36ch; margin-bottom: 20px; line-height: 1.4; }
 
+.gamer-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
 .fortnite-pill {
   display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px;
   background: rgba(0, 240, 255, 0.08); border: 1px solid rgba(0, 240, 255, 0.35);
   color: var(--fortnite-cyan); font-size: .78rem; letter-spacing: .08em;
-  text-transform: uppercase; margin-bottom: 20px; width: fit-content;
+  text-transform: uppercase; width: fit-content;
 }
 .fortnite-pill strong { color: #fff; letter-spacing: .1em; }
+
+.discord-pill {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px;
+  background: rgba(88, 101, 242, 0.1); border: 1px solid rgba(88, 101, 242, 0.4);
+  color: #9baaff; font-size: .78rem; letter-spacing: .08em;
+  text-transform: uppercase; width: fit-content;
+}
+.discord-pill strong { color: #fff; letter-spacing: .08em; }
 
 .links { display: flex; flex-wrap: wrap; gap: 8px; }
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   min-height: 44px; padding: 0 20px;
   font-family: var(--mono); font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
-  border: 2px solid var(--bone); transition: all .18s ease; text-decoration: none;
+  border: 1px solid var(--gold); background: rgba(212, 175, 55, 0.06); color: var(--gold-bright);
+  transition: all .18s ease; text-decoration: none;
 }
 .btn svg { flex-shrink: 0; }
-.btn:hover { background: var(--bone); color: var(--ink); transform: translateY(-2px); }
+.btn:hover { background: var(--gold); color: var(--ink); transform: translateY(-2px); box-shadow: 0 0 16px var(--gold-glow); }
 
 .btn-kick { border-color: var(--kick-green); color: var(--kick-green); background: rgba(83, 252, 24, 0.06); }
 .btn-kick:hover { background: var(--kick-green); color: #000; border-color: var(--kick-green); box-shadow: 0 0 18px rgba(83, 252, 24, 0.4); }
@@ -212,7 +222,7 @@ img { display: block; max-width: 100%; }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 
 /* ---------- Shared section frame ---------- */
-.featured, .wall, .about { max-width: var(--max); margin: 0 auto; padding: clamp(32px, 6vw, 72px) var(--gutter); }
+.featured, .wall, .about { max-width: var(--max); margin: 0 auto; padding: clamp(24px, 4.5vw, 56px) var(--gutter); }
 .section-label {
   display: flex; justify-content: space-between; align-items: baseline;
   padding-bottom: 12px; margin-bottom: 20px; border-bottom: 2px solid var(--gold);
@@ -220,26 +230,47 @@ img { display: block; max-width: 100%; }
 .section-title-wrap { display: flex; align-items: center; gap: 10px; }
 .section-title-wrap h2 { color: var(--gold-bright); }
 
-/* ---------- Players ---------- */
+/* ---------- Featured Spotlight (Compact & Proportional) ---------- */
+.featured-spotlight {
+  display: grid;
+  grid-template-columns: minmax(300px, 1.35fr) 1fr;
+  gap: 24px 36px;
+  align-items: center;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 16px;
+  box-shadow: 0 4px 28px rgba(0, 0, 0, 0.7), 0 0 16px rgba(212, 175, 55, 0.06);
+}
+.featured-frame {
+  position: relative; aspect-ratio: 16 / 9; background: #000;
+  border: 1px solid var(--line-strong);
+  max-width: 600px; width: 100%;
+}
 .frame { position: relative; aspect-ratio: 16 / 9; background: #000; border: 1px solid var(--line-strong); box-shadow: 0 4px 28px rgba(0, 0, 0, 0.8), 0 0 16px rgba(212, 175, 55, 0.08); }
 .frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .slate {
   position: absolute; inset: 0; display: grid; place-content: center; gap: 8px; text-align: center; padding: 24px;
   background: repeating-linear-gradient(135deg, #090b0e 0 14px, #10141a 14px 28px);
 }
-.slate strong { font-family: var(--display); font-size: clamp(1.6rem, 5vw, 3.2rem); text-transform: uppercase; line-height: 1; }
+.slate strong { font-family: var(--display); font-size: clamp(1.4rem, 4vw, 2.4rem); text-transform: uppercase; line-height: 1; }
 
-.featured-caption { display: grid; grid-template-columns: 1.6fr 1fr; gap: 24px 48px; align-items: start; margin-top: 20px; }
+.featured-caption { display: flex; flex-direction: column; gap: 12px; justify-content: center; }
 #featured-index { color: var(--gold); }
 ::selection { background: var(--gold); color: var(--ink); }
-.featured-title { font-family: var(--display); font-weight: 800; text-transform: uppercase; font-size: clamp(2rem, 5vw, 3.6rem); line-height: .95; }
-.meta { color: var(--mute); margin-bottom: 12px; }
-.textlink {
-  font-family: var(--mono); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em;
-  text-decoration: underline; text-underline-offset: 4px; display: inline-flex; align-items: center; gap: 6px; padding: 12px 0;
-  color: var(--gold-bright);
+.featured-title {
+  font-family: var(--display); font-weight: 800; text-transform: uppercase;
+  font-size: clamp(1.4rem, 2.5vw, 2.2rem); line-height: 1.05; color: var(--bone);
 }
-.textlink:hover { color: var(--red); }
+.meta { color: var(--mute); margin-bottom: 4px; }
+.btn-featured-link {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; min-height: 38px;
+  font-family: var(--mono); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase;
+  border: 1px solid var(--gold); color: var(--gold-bright); background: rgba(212, 175, 55, 0.08);
+  width: fit-content; margin-top: 4px; transition: all .15s ease;
+}
+.btn-featured-link:hover {
+  background: var(--gold); color: var(--ink); box-shadow: 0 0 12px var(--gold-glow);
+}
 
 /* ---------- Controls ---------- */
 .demo-note { border: 1px dashed var(--gold-dark); color: var(--mute); padding: 12px 14px; margin-bottom: 20px; text-transform: none; letter-spacing: .02em; background: rgba(212, 175, 55, 0.04); }
@@ -429,7 +460,11 @@ img { display: block; max-width: 100%; }
 /* ---------- Responsive ---------- */
 @media (max-width: 1024px) {
   .grid { grid-template-columns: repeat(2, 1fr); }
-  .featured-caption, .about-grid { grid-template-columns: 1fr; }
+  .about-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 860px) {
+  .featured-spotlight { grid-template-columns: 1fr; gap: 16px; padding: 14px; }
+  .featured-frame { max-width: 100%; margin: 0 auto; }
 }
 @media (max-width: 720px) {
   .hero { grid-template-columns: 1fr; gap: 24px; }
