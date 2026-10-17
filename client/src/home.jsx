@@ -19,7 +19,8 @@ import {
   CrownIcon,
   LaughIcon,
   ExternalLinkIcon,
-  ClockIcon
+  ClockIcon,
+  MonitorIcon
 } from './lib/icons.jsx';
 
 /* ---------- Small pieces ---------- */
@@ -46,26 +47,24 @@ function Header({ gamerTag }) {
   );
 }
 
-function LiveStrip({ status, twitchUrl, kickUrl }) {
+function LiveStrip({ status, kickUrl }) {
   if (!status?.live) return null;
   const viewers = Number(status.viewers || 0).toLocaleString();
-  const isKick = status.platform === 'kick';
-  const liveUrl = isKick ? (kickUrl || 'https://kick.com/dark-phoneix') : (twitchUrl || 'https://twitch.tv/');
-  const livePlatform = isKick ? 'Kick' : 'Twitch';
+  const liveUrl = kickUrl || 'https://kick.com/dark-phoneix';
   return (
     <a id="onair" className="onair" href={liveUrl} target="_blank" rel="noopener noreferrer">
       <span className="onair-tag">
         <span className="onair-pulse">
           <LiveRadarIcon size={18} />
         </span>
-        LIVE ON {livePlatform}
+        LIVE ON KICK
       </span>
       <span className="onair-detail">
         {status.game ? `Playing ${status.game}. ` : ''}{viewers} watching now
         {status.title ? ` • "${status.title}"` : ''}
       </span>
       <span className="onair-cta">
-        Watch stream <ExternalLinkIcon size={13} />
+        Watch on Kick <ExternalLinkIcon size={13} />
       </span>
     </a>
   );
@@ -74,6 +73,11 @@ function LiveStrip({ status, twitchUrl, kickUrl }) {
 function Hero({ cfg }) {
   const s = cfg.socials || {};
   const tag = cfg.gamerTag || 'Dark Phoneix';
+  const epicTag = cfg.epicTag || cfg.fortniteTag;
+  const fortniteGgUrl = cfg.fortniteGgUrl || s.fortniteGg || (epicTag ? `https://fortnite.gg/stats?player=${encodeURIComponent(epicTag)}` : null);
+  const showTwitch = Boolean(cfg.showTwitch && s.twitch);
+  const showYouTube = Boolean(cfg.showYouTube && s.youtube);
+
   return (
     <section id="home" className="hero" aria-labelledby="gamer-tag">
       <div>
@@ -91,16 +95,27 @@ function Hero({ cfg }) {
       <div className="hero-side">
         {cfg.tagline ? <p className="hero-tagline">{cfg.tagline}</p> : null}
         <div className="gamer-pills">
-          {cfg.fortniteTag ? (
-            <div className="fortnite-pill mono">
-              <FortniteIcon size={16} />
-              <span className="dim">EPIC / FORTNITE:</span>
-              <strong>{cfg.fortniteTag}</strong>
+          <div className="pc-pill mono" title="Primary Gaming Rig">
+            <MonitorIcon size={14} />
+            <span>PC PLAYER</span>
+          </div>
+          {epicTag ? (
+            <div className="epic-pill mono" title="Epic Games Gamer Tag">
+              <FortniteIcon size={14} />
+              <span className="dim">EPIC:</span>
+              <strong>{epicTag}</strong>
             </div>
+          ) : null}
+          {fortniteGgUrl ? (
+            <a className="fortnitegg-pill mono" href={fortniteGgUrl} target="_blank" rel="noopener noreferrer" title="View Fortnite.gg Stats Profile">
+              <span className="dim">STATS:</span>
+              <strong>FORTNITE.GG</strong>
+              <ExternalLinkIcon size={11} />
+            </a>
           ) : null}
           {cfg.discordTag ? (
             <div className="discord-pill mono" title="Discord: darkphoneix / darkphoneix01398">
-              <DiscordIcon size={16} />
+              <DiscordIcon size={15} />
               <span className="dim">DISCORD:</span>
               <strong>{cfg.discordTag}</strong>
             </div>
@@ -112,19 +127,24 @@ function Hero({ cfg }) {
               <KickIcon size={18} /> Kick
             </a>
           ) : null}
-          {s.youtube ? (
+          {s.discord ? (
+            <a className="btn btn-discord" href={s.discord} target="_blank" rel="noopener noreferrer">
+              <DiscordIcon size={18} /> Discord
+            </a>
+          ) : null}
+          {fortniteGgUrl ? (
+            <a className="btn btn-fortnitegg" href={fortniteGgUrl} target="_blank" rel="noopener noreferrer">
+              <ExternalLinkIcon size={14} /> Fortnite.gg
+            </a>
+          ) : null}
+          {showYouTube ? (
             <a className="btn btn-youtube" href={s.youtube} target="_blank" rel="noopener noreferrer">
               <YouTubeIcon size={18} /> YouTube
             </a>
           ) : null}
-          {s.twitch ? (
+          {showTwitch ? (
             <a className="btn btn-twitch" href={s.twitch} target="_blank" rel="noopener noreferrer">
               <TwitchIcon size={18} /> Twitch
-            </a>
-          ) : null}
-          {s.discord ? (
-            <a className="btn btn-discord" href={s.discord} target="_blank" rel="noopener noreferrer">
-              <DiscordIcon size={18} /> Discord
             </a>
           ) : null}
         </div>
@@ -326,16 +346,25 @@ function SkeletonGrid() {
 
 const VIBES = ['all', 'clutch', 'ace', 'funny', 'epic'];
 
-function FilterWall({ clips, numbers, loading, onOpen }) {
+function FilterWall({ clips, numbers, loading, onOpen, cfg }) {
   const [platform, setPlatform] = useState('all');
   const [vibe, setVibe] = useState('all');
   const [game, setGame] = useState('all');
   const [search, setSearch] = useState('');
 
+  const showTwitch = Boolean(cfg?.showTwitch);
+  const showYouTube = Boolean(cfg?.showYouTube);
+
   const platforms = useMemo(() => {
+    const list = ['all'];
     const hasKick = clips.some(c => c.platform === 'kick');
-    return hasKick ? ['all', 'kick', 'twitch', 'youtube'] : ['all', 'twitch', 'youtube'];
-  }, [clips]);
+    const hasTwitch = showTwitch && clips.some(c => c.platform === 'twitch');
+    const hasYouTube = showYouTube && clips.some(c => c.platform === 'youtube');
+    if (hasKick) list.push('kick');
+    if (hasTwitch) list.push('twitch');
+    if (hasYouTube) list.push('youtube');
+    return list;
+  }, [clips, showTwitch, showYouTube]);
 
   const games = useMemo(
     () => [...new Set(clips.map(c => c.game).filter(Boolean))].sort(),
@@ -345,7 +374,11 @@ function FilterWall({ clips, numbers, loading, onOpen }) {
   const q = search.trim().toLowerCase();
   const visible = clips.filter(
     c =>
-      (platform === 'all' || c.platform === platform) &&
+      (platform === 'all'
+        ? (c.platform === 'kick' ||
+           (c.platform === 'twitch' && showTwitch) ||
+           (c.platform === 'youtube' && showYouTube))
+        : c.platform === platform) &&
       (vibe === 'all' || String(c.vibe || '').toLowerCase() === vibe) &&
       (game === 'all' || c.game === game) &&
       (!q || `${c.title} ${c.game}`.toLowerCase().includes(q))
@@ -371,14 +404,21 @@ function FilterWall({ clips, numbers, loading, onOpen }) {
       <div className="sticky-controls">
         <div className="controls">
           <div className="group" role="group" aria-label="Platform">
-            {platforms.map(p => (
-              <button key={p} type="button" className="chip" aria-pressed={platform === p} onClick={() => setPlatform(p)}>
-                {p === 'kick' && <KickIcon size={14} />}
-                {p === 'twitch' && <TwitchIcon size={14} />}
-                {p === 'youtube' && <YouTubeIcon size={14} />}
-                <span>{p === 'all' ? 'All Platforms' : platformLabel(p)}</span>
-              </button>
-            ))}
+            {platforms.length <= 2 ? (
+              <div className="platform-single-tag mono">
+                <KickIcon size={14} />
+                <span>KICK ARCHIVE</span>
+              </div>
+            ) : (
+              platforms.map(p => (
+                <button key={p} type="button" className="chip" aria-pressed={platform === p} onClick={() => setPlatform(p)}>
+                  {p === 'kick' && <KickIcon size={14} />}
+                  {p === 'twitch' && <TwitchIcon size={14} />}
+                  {p === 'youtube' && <YouTubeIcon size={14} />}
+                  <span>{p === 'all' ? 'All Platforms' : platformLabel(p)}</span>
+                </button>
+              ))
+            )}
           </div>
           <div className="fields">
             <div className="search-field">
@@ -430,6 +470,12 @@ function FilterWall({ clips, numbers, loading, onOpen }) {
 }
 
 function About({ cfg }) {
+  const epicTag = cfg.epicTag || cfg.fortniteTag;
+  const fortniteGgUrl = cfg.fortniteGgUrl || cfg.socials?.fortniteGg || (epicTag ? `https://fortnite.gg/stats?player=${encodeURIComponent(epicTag)}` : null);
+  const schedule = cfg.schedule || [];
+  const scheduleNote = cfg.scheduleNote || "No fixed schedule right now — stream alerts & community drops are announced live in Discord.";
+  const discordUrl = cfg.socials?.discord || 'https://discord.gg/darkphoneix';
+
   return (
     <section id="about" className="about" aria-labelledby="about-title">
       <div className="section-label">
@@ -448,35 +494,74 @@ function About({ cfg }) {
               </li>
             ))}
           </ul>
-          {cfg.fortniteTag ? (
-            <p className="mono dim" style={{ marginTop: 18, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <FortniteIcon size={15} /> Fortnite Clan: <strong>{cfg.fortniteTag}</strong>
-            </p>
-          ) : null}
-          {cfg.discordTag ? (
-            <p className="mono dim" style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <DiscordIcon size={15} /> Discord: <strong>{cfg.discordTag}</strong>
-            </p>
-          ) : null}
-        </div>
-        <dl className="schedule" aria-label="Stream schedule">
-          {(cfg.schedule || []).map((r, i) => (
-            <div key={i}>
-              <dt>{r.days}</dt>
-              <dd>
-                <b><ClockIcon size={12} /> {r.time}</b>
-                {r.activity}
-              </dd>
+          <div className="about-specs mono">
+            <div className="about-spec-line">
+              <MonitorIcon size={15} /> Rig: <strong>{cfg.device || 'PC (Mouse & Keyboard)'}</strong>
             </div>
-          ))}
-        </dl>
+            {epicTag ? (
+              <div className="about-spec-line">
+                <FortniteIcon size={15} /> Epic Games Tag: <strong>{epicTag}</strong>
+              </div>
+            ) : null}
+            {fortniteGgUrl ? (
+              <div className="about-spec-line">
+                <ExternalLinkIcon size={15} /> Fortnite.gg: <a href={fortniteGgUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--gold-bright)', textDecoration: 'underline' }}>View Stats Profile</a>
+              </div>
+            ) : null}
+            {cfg.discordTag ? (
+              <div className="about-spec-line">
+                <DiscordIcon size={15} /> Discord: <strong>{cfg.discordTag}</strong>
+              </div>
+            ) : null}
+          </div>
+        </div>
+        <div className="about-schedule-pane">
+          {schedule.length > 0 ? (
+            <dl className="schedule" aria-label="Stream schedule">
+              {schedule.map((r, i) => (
+                <div key={i}>
+                  <dt>{r.days}</dt>
+                  <dd>
+                    <b><ClockIcon size={12} /> {r.time}</b>
+                    {r.activity}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          ) : (
+            <div className="schedule-status-box">
+              <span className="schedule-status-tag mono">
+                <DiscordIcon size={14} /> STREAM SCHEDULE UPDATE
+              </span>
+              <h3 className="schedule-status-head">LIVE ALERTS ON DISCORD</h3>
+              <p className="schedule-status-desc">{scheduleNote}</p>
+              {discordUrl ? (
+                <a className="btn btn-discord mini-btn" href={discordUrl} target="_blank" rel="noopener noreferrer">
+                  <DiscordIcon size={16} /> Join Discord For Live Pings
+                </a>
+              ) : null}
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );
 }
 
 function Footer({ cfg }) {
-  const socials = Object.entries(cfg.socials || {}).filter(([, href]) => href);
+  const s = cfg.socials || {};
+  const showTwitch = Boolean(cfg.showTwitch);
+  const showYouTube = Boolean(cfg.showYouTube);
+  const epicTag = cfg.epicTag || cfg.fortniteTag;
+  const fortniteGgUrl = cfg.fortniteGgUrl || s.fortniteGg || (epicTag ? `https://fortnite.gg/stats?player=${encodeURIComponent(epicTag)}` : null);
+
+  const links = [];
+  if (s.kick) links.push({ key: 'kick', href: s.kick, label: 'Kick', icon: <KickIcon size={14} /> });
+  if (s.discord) links.push({ key: 'discord', href: s.discord, label: 'Discord', icon: <DiscordIcon size={14} /> });
+  if (fortniteGgUrl) links.push({ key: 'fortnitegg', href: fortniteGgUrl, label: 'Fortnite.gg', icon: <ExternalLinkIcon size={14} /> });
+  if (showYouTube && s.youtube) links.push({ key: 'youtube', href: s.youtube, label: 'YouTube', icon: <YouTubeIcon size={14} /> });
+  if (showTwitch && s.twitch) links.push({ key: 'twitch', href: s.twitch, label: 'Twitch', icon: <TwitchIcon size={14} /> });
+
   return (
     <footer className="foot">
       <div className="foot-brand">
@@ -484,13 +569,10 @@ function Footer({ cfg }) {
         <span className="mono dim">© {new Date().getFullYear()} {cfg.gamerTag || 'Dark Phoneix'} • All Rights Reserved</span>
       </div>
       <nav aria-label="Social" className="foot-links">
-        {socials.map(([k, href]) => (
-          <a key={k} href={href} target="_blank" rel="noopener noreferrer">
-            {k === 'kick' && <KickIcon size={14} />}
-            {k === 'youtube' && <YouTubeIcon size={14} />}
-            {k === 'twitch' && <TwitchIcon size={14} />}
-            {k === 'discord' && <DiscordIcon size={14} />}
-            <span>{k}</span>
+        {links.map(l => (
+          <a key={l.key} href={l.href} target="_blank" rel="noopener noreferrer">
+            {l.icon}
+            <span>{l.label}</span>
           </a>
         ))}
       </nav>
@@ -592,7 +674,7 @@ export function Home() {
     <>
       <SkipLink />
       <Header gamerTag={cfg.gamerTag} />
-      <LiveStrip status={status} twitchUrl={cfg.socials?.twitch} kickUrl={cfg.socials?.kick} />
+      <LiveStrip status={status} kickUrl={cfg.socials?.kick} />
       <main id="main">
         <Hero cfg={cfg} />
         {failed && !loading ? (
@@ -603,7 +685,7 @@ export function Home() {
           </section>
         ) : null}
         {featured ? <Featured clip={featured} logNo={pad3(numbers.get(featured.id))} /> : null}
-        <FilterWall clips={clips} numbers={numbers} loading={loading} onOpen={openClip} />
+        <FilterWall clips={clips} numbers={numbers} loading={loading} onOpen={openClip} cfg={cfg} />
         <About cfg={cfg} />
       </main>
       <Footer cfg={cfg} />

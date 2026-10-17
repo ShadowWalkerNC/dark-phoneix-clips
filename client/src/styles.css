@@ -174,6 +174,33 @@ img { display: block; max-width: 100%; }
 .hero-tagline { color: var(--mute); font-size: 1.05rem; max-width: 36ch; margin-bottom: 20px; line-height: 1.4; }
 
 .gamer-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.pc-pill {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
+  background: rgba(212, 175, 55, 0.12); border: 1px solid var(--gold);
+  color: var(--gold-bright); font-size: .78rem; letter-spacing: .08em;
+  text-transform: uppercase; width: fit-content; font-weight: 700;
+  box-shadow: 0 0 10px var(--gold-glow);
+}
+.epic-pill {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px;
+  background: rgba(0, 240, 255, 0.08); border: 1px solid rgba(0, 240, 255, 0.35);
+  color: var(--fortnite-cyan); font-size: .78rem; letter-spacing: .08em;
+  text-transform: uppercase; width: fit-content;
+}
+.epic-pill strong { color: #fff; letter-spacing: .08em; }
+
+.fortnitegg-pill {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
+  background: rgba(255, 215, 0, 0.08); border: 1px solid rgba(255, 215, 0, 0.35);
+  color: #ffd700; font-size: .78rem; letter-spacing: .08em;
+  text-transform: uppercase; width: fit-content; text-decoration: none;
+  transition: all .15s ease;
+}
+.fortnitegg-pill:hover {
+  background: rgba(255, 215, 0, 0.18); border-color: #ffd700; transform: translateY(-1px);
+}
+.fortnitegg-pill strong { color: #fff; }
+
 .fortnite-pill {
   display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px;
   background: rgba(0, 240, 255, 0.08); border: 1px solid rgba(0, 240, 255, 0.35);
@@ -203,6 +230,9 @@ img { display: block; max-width: 100%; }
 
 .btn-kick { border-color: var(--kick-green); color: var(--kick-green); background: rgba(83, 252, 24, 0.06); }
 .btn-kick:hover { background: var(--kick-green); color: #000; border-color: var(--kick-green); box-shadow: 0 0 18px rgba(83, 252, 24, 0.4); }
+
+.btn-fortnitegg { border-color: rgba(255, 215, 0, 0.45); color: #ffd700; background: rgba(255, 215, 0, 0.06); }
+.btn-fortnitegg:hover { background: #ffd700; color: #000; border-color: #ffd700; box-shadow: 0 0 16px rgba(255, 215, 0, 0.4); }
 
 .btn-youtube { border-color: var(--yt-red); color: #ff5555; background: rgba(255, 0, 0, 0.06); }
 .btn-youtube:hover { background: var(--yt-red); color: #fff; border-color: var(--yt-red); box-shadow: 0 0 18px rgba(255, 0, 0, 0.4); }
@@ -413,14 +443,48 @@ img { display: block; max-width: 100%; }
 .errbar { border: 1px solid var(--red); color: var(--bone); padding: 14px 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
 .errbar .mini { border-color: var(--red); }
 
+/* ---------- Platform Badge ---------- */
+.platform-single-tag {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px;
+  background: rgba(83, 252, 24, 0.08); border: 1px solid rgba(83, 252, 24, 0.4);
+  color: var(--kick-green); font-size: .78rem; letter-spacing: .08em;
+}
+
 /* ---------- About ---------- */
-.about-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px 64px; }
+.about-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 32px 56px; align-items: start; }
 .bio { font-family: var(--display); font-weight: 700; font-size: clamp(1.8rem, 3.6vw, 2.8rem); line-height: 1.05; text-transform: uppercase; }
-.games { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 28px; }
+.games { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 24px; }
 .games li {
   border: 1px solid var(--line); padding: 6px 12px; font-family: var(--mono); font-size: .78rem; text-transform: uppercase; letter-spacing: .06em;
   display: inline-flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.02);
 }
+.about-specs {
+  display: flex; flex-direction: column; gap: 10px; margin-top: 24px; padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.about-spec-line {
+  display: flex; align-items: center; gap: 8px; font-size: .85rem;
+}
+.about-schedule-pane { height: 100%; display: flex; flex-direction: column; }
+.schedule-status-box {
+  background: var(--panel); border: 1px solid var(--line); padding: 28px 24px;
+  display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+.schedule-status-tag {
+  color: var(--gold-bright); font-size: .75rem; letter-spacing: .1em;
+  display: flex; align-items: center; gap: 6px;
+}
+.schedule-status-head {
+  font-family: var(--display); font-weight: 800; font-size: 1.7rem;
+  text-transform: uppercase; color: var(--bone); line-height: 1.05;
+}
+.schedule-status-desc {
+  color: var(--mute); font-size: .95rem; line-height: 1.5; max-width: 44ch;
+}
+.mini-btn {
+  min-height: 38px; padding: 0 16px; font-size: .76rem; width: fit-content; margin-top: 8px;
+}
+
 .schedule > div { display: grid; grid-template-columns: 8.5rem 1fr; gap: 4px 16px; padding: 14px 0; border-bottom: 1px solid var(--line); }
 .schedule dt { font-family: var(--display); font-weight: 800; font-size: 1.4rem; text-transform: uppercase; line-height: 1; color: var(--gold-bright); }
 .schedule dd { color: var(--mute); }

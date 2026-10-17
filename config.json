@@ -1,29 +1,29 @@
 {
   "gamerTag": "Dark Phoneix",
   "title": "Dark Phoneix — Stream & Clips Vault",
-  "tagline": "Fortnite grinds and clutch stream highlights, logged in one place.",
-  "bio": "Fortnite grinder repping LDG. Ranked grinds, clutch plays and squad chaos — live on Kick, highlights everywhere else.",
-  "primaryGames": ["Fortnite", "VALORANT", "Apex Legends", "Marvel Rivals", "Counter-Strike 2"],
-  "schedule": [
-    { "days": "Mon - Thu", "time": "7:00 PM - 11:30 PM EST", "activity": "Ranked VALORANT & Squad Queues" },
-    { "days": "Friday", "time": "8:00 PM - Late", "activity": "Community Games & Viewer 5v5s" },
-    { "days": "Saturday", "time": "2:00 PM - 8:00 PM EST", "activity": "Tournament Watch Parties & Grinds" },
-    { "days": "Sunday", "time": "Off / Clips Review", "activity": "Vod Reviews & Rest Day" }
-  ],
-  "socials": {
-    "twitch": "https://twitch.tv/ryan",
-    "youtube": "https://youtube.com/@ryan",
-    "discord": "https://discord.com/users/darkphoneix01398",
-    "twitter": "https://x.com/ryan",
-    "kick": "https://kick.com/dark-phoneix"
-  },
-  "twitchChannel": "ryan",
-  "kickChannel": "dark-phoneix",
+  "tagline": "PC gamer & Fortnite grinder. Ranked plays, clutch moments & squad chaos.",
+  "bio": "PC gamer & Fortnite grinder. Ranked grinds, clutch plays and squad chaos — live on Kick.",
+  "device": "PC",
+  "epicTag": "DarkPhoneix_LDG",
   "fortniteTag": "DarkPhoneix_LDG",
+  "fortniteGgUrl": "https://fortnite.gg/stats?player=DarkPhoneix_LDG",
   "discordTag": "darkphoneix / darkphoneix01398",
+  "showTwitch": false,
+  "showYouTube": false,
+  "showKick": true,
+  "primaryGames": ["Fortnite", "Call of Duty: Warzone", "Off The Grid", "VALORANT"],
+  "schedule": [],
+  "scheduleNote": "No fixed schedule right now — stream alerts & community drops are announced live in Discord.",
+  "socials": {
+    "kick": "https://kick.com/dark-phoneix",
+    "discord": "https://discord.com/users/darkphoneix01398",
+    "fortniteGg": "https://fortnite.gg/stats?player=DarkPhoneix_LDG"
+  },
+  "twitchChannel": "",
+  "kickChannel": "dark-phoneix",
   "theme": {
-    "accentColor": "#ff0000",
-    "twitchColor": "#9146ff",
-    "bgDark": "#0b0d10"
+    "accentColor": "#e61919",
+    "goldColor": "#d4af37",
+    "bgDark": "#07080a"
   }
 }

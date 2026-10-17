@@ -120,8 +120,15 @@ export function Console() {
       title: cfg.title || '',
       tagline: cfg.tagline || '',
       bio: cfg.bio || '',
+      device: cfg.device || 'PC',
+      epicTag: cfg.epicTag || cfg.fortniteTag || '',
       fortniteTag: cfg.fortniteTag || '',
+      fortniteGgUrl: cfg.fortniteGgUrl || '',
       discordTag: cfg.discordTag || '',
+      showTwitch: cfg.showTwitch === true,
+      showYouTube: cfg.showYouTube === true,
+      showKick: cfg.showKick !== false,
+      scheduleNote: cfg.scheduleNote || '',
       games: (cfg.primaryGames || []).join(', '),
       twitch: cfg.socials?.twitch || '',
       youtube: cfg.socials?.youtube || '',
@@ -172,15 +179,23 @@ export function Console() {
         title: profile.title,
         tagline: profile.tagline,
         bio: profile.bio,
-        fortniteTag: profile.fortniteTag,
+        device: profile.device,
+        epicTag: profile.epicTag,
+        fortniteTag: profile.epicTag || profile.fortniteTag,
+        fortniteGgUrl: profile.fortniteGgUrl,
         discordTag: profile.discordTag,
+        showTwitch: Boolean(profile.showTwitch),
+        showYouTube: Boolean(profile.showYouTube),
+        showKick: profile.showKick !== false,
+        scheduleNote: profile.scheduleNote,
         primaryGames: profile.games.split(',').map(g => g.trim()).filter(Boolean),
         socials: {
           twitch: profile.twitch.trim(),
           youtube: profile.youtube.trim(),
           discord: profile.discord.trim(),
           twitter: profile.twitter.trim(),
-          kick: profile.kick.trim()
+          kick: profile.kick.trim(),
+          fortniteGg: (profile.fortniteGgUrl || '').trim()
         },
         schedule
       });
@@ -378,14 +393,18 @@ export function Console() {
             <form onSubmit={saveProfile}>
               <div className="frow">
                 <label className="afield">Gamer tag <input type="text" maxLength={120} value={profile.gamerTag} onChange={set('gamerTag')} /></label>
+                <label className="afield">Rig / Platform <input type="text" maxLength={60} placeholder="PC" value={profile.device} onChange={set('device')} /></label>
+              </div>
+              <div className="frow">
+                <label className="afield">Epic Games gamer tag <input type="text" maxLength={60} placeholder="DarkPhoneix_LDG" value={profile.epicTag} onChange={set('epicTag')} /></label>
+                <label className="afield">Fortnite.gg profile URL <input type="url" placeholder="https://fortnite.gg/stats?player=DarkPhoneix_LDG" value={profile.fortniteGgUrl} onChange={set('fortniteGgUrl')} /></label>
+              </div>
+              <div className="frow">
+                <label className="afield">Discord username / tag <input type="text" maxLength={60} placeholder="darkphoneix / darkphoneix01398" value={profile.discordTag} onChange={set('discordTag')} /></label>
                 <label className="afield">Twitch channel (no @) <input type="text" maxLength={120} value={profile.twitchChannel} onChange={set('twitchChannel')} /></label>
               </div>
               <div className="frow single">
                 <label className="afield">Page title <input type="text" maxLength={120} value={profile.title} onChange={set('title')} /></label>
-              </div>
-              <div className="frow">
-                <label className="afield">Fortnite tag <input type="text" maxLength={60} placeholder="Epic username" value={profile.fortniteTag} onChange={set('fortniteTag')} /></label>
-                <label className="afield">Discord user tag <input type="text" maxLength={60} placeholder="darkphoneix / darkphoneix01398" value={profile.discordTag} onChange={set('discordTag')} /></label>
               </div>
               <div className="frow single">
                 <label className="afield">Tagline <input type="text" maxLength={120} value={profile.tagline} onChange={set('tagline')} /></label>
@@ -396,19 +415,44 @@ export function Console() {
               <div className="frow single">
                 <label className="afield">Main games (comma separated) <input type="text" placeholder="Fortnite, VALORANT" value={profile.games} onChange={set('games')} /></label>
               </div>
-              <div className="frow">
-                <label className="afield">Twitch URL <input type="url" placeholder="https://twitch.tv/..." value={profile.twitch} onChange={set('twitch')} /></label>
-                <label className="afield">YouTube URL <input type="url" placeholder="https://youtube.com/@..." value={profile.youtube} onChange={set('youtube')} /></label>
+              <div className="frow single">
+                <label className="afield">Kick URL <input type="url" placeholder="https://kick.com/..." value={profile.kick} onChange={set('kick')} /></label>
               </div>
               <div className="frow">
                 <label className="afield">Discord invite <input type="url" placeholder="https://discord.gg/..." value={profile.discord} onChange={set('discord')} /></label>
                 <label className="afield">X / Twitter URL <input type="url" placeholder="https://x.com/..." value={profile.twitter} onChange={set('twitter')} /></label>
               </div>
-              <div className="frow single">
-                <label className="afield">Kick URL <input type="url" placeholder="https://kick.com/..." value={profile.kick} onChange={set('kick')} /></label>
+              <div className="frow">
+                <label className="afield">Twitch URL <input type="url" placeholder="https://twitch.tv/..." value={profile.twitch} onChange={set('twitch')} /></label>
+                <label className="afield">YouTube URL <input type="url" placeholder="https://youtube.com/@..." value={profile.youtube} onChange={set('youtube')} /></label>
+              </div>
+              <div className="frow">
+                <label className="afield" style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={profile.showTwitch}
+                    onChange={e => setProfile(p => ({ ...p, showTwitch: e.target.checked }))}
+                    style={{ width: 18, height: 18, cursor: 'pointer' }}
+                  />
+                  <span>Show Twitch on public page (hidden for now)</span>
+                </label>
+                <label className="afield" style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={profile.showYouTube}
+                    onChange={e => setProfile(p => ({ ...p, showYouTube: e.target.checked }))}
+                    style={{ width: 18, height: 18, cursor: 'pointer' }}
+                  />
+                  <span>Show YouTube on public page (hidden for now)</span>
+                </label>
               </div>
               <div className="frow single">
-                <label className="afield">Schedule (one per line: days | time | activity)
+                <label className="afield">Schedule status note (shown when no fixed schedule)
+                  <textarea placeholder="No fixed schedule right now — stream alerts & community drops are announced live in Discord." value={profile.scheduleNote} onChange={set('scheduleNote')} />
+                </label>
+              </div>
+              <div className="frow single">
+                <label className="afield">Schedule table (optional, one per line: days | time | activity)
                   <textarea placeholder="Mon - Thu | 7:00 PM - 11:30 PM EST | Ranked grind" value={profile.schedule} onChange={set('schedule')} />
                 </label>
               </div>
