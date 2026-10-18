@@ -256,18 +256,6 @@ function Header({ status, onOpenSearch, kickUrl, discordUrl, activeNav, onSelect
           <PhoenixLogo size={36} className="brand-icon" />
           <span className="brand-text">DARK PHOENIX</span>
         </a>
-
-        {/* Live Status Pill */}
-        <a
-          href={liveUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="header-status-pill mono"
-          title="Streaming live on Kick"
-        >
-          <span className="header-status-dot" aria-hidden="true" />
-          <span>LIVE</span>
-        </a>
       </div>
 
       {/* Desktop Navigation Links */}
@@ -278,6 +266,13 @@ function Header({ status, onOpenSearch, kickUrl, discordUrl, activeNav, onSelect
           onClick={() => onSelectNav('streams')}
         >
           STREAMS
+        </a>
+        <a
+          href="#games"
+          className={`nav-link ${activeNav === 'games' ? 'is-active' : ''}`}
+          onClick={() => onSelectNav('games')}
+        >
+          GAMES MATRIX
         </a>
         <a
           href="#clips"
@@ -393,9 +388,6 @@ function Hero({ cfg, onFilterGame, onToast }) {
               <div className="hero-crest-halo" aria-hidden="true" />
               <span className="hero-crest-lvl-badge mono">LVL 100</span>
             </div>
-            <div className="mobile-live-chip mono">
-              <span className="status-dot-green" /> LIVE ON KICK
-            </div>
           </div>
 
           <div className="hero-text-content">
@@ -406,25 +398,21 @@ function Hero({ cfg, onFilterGame, onToast }) {
               </span>
             </div>
 
-            <div className="hero-live-kick-pill mono">
-              <span className="status-dot-green" /> LIVE ON KICK
-            </div>
-
             <div className="hero-tags-headline mono">
               <span>PC GAMER</span> • <span>FORTNITE GRINDER</span> • <span>TACTICAL RANKED</span> • <span>CONTENT CREATOR</span>
             </div>
 
             <p className="hero-description">
-              Ranked grinds, clutch 1v4 plays, high-kill lobbies, and pure squad chaos. Streaming competitive FPS & Battle Royale live on Kick daily from the ashes.
+              Ranked grinds, clutch 1v4 plays, high-kill lobbies, and pure squad chaos. Streaming competitive FPS & Battle Royale on Kick from the ashes.
             </p>
 
             {/* Quick Game Filter Pills */}
             <div className="hero-game-pills mono" aria-label="Game Filter Shortcuts">
               {[
-                { label: 'FORTNITE RANKED', game: 'Fortnite Ranked' },
-                { label: 'WARZONE RESURGENCE', game: 'Call of Duty: Warzone' },
-                { label: 'OFF THE GRID', game: 'Off The Grid' },
-                { label: 'THE FINALS', game: 'The Finals' }
+                { label: 'FORTNITE RANKED', game: 'Fortnite Ranked', pct: '45%' },
+                { label: 'WARZONE RESURGENCE', game: 'Call of Duty: Warzone', pct: '25%' },
+                { label: 'OFF THE GRID', game: 'Off The Grid', pct: '18%' },
+                { label: 'THE FINALS', game: 'The Finals', pct: '12%' }
               ].map(item => (
                 <button
                   key={item.label}
@@ -434,6 +422,7 @@ function Hero({ cfg, onFilterGame, onToast }) {
                   title={`Filter vault by ${item.game}`}
                 >
                   <span className="hero-chip-bullet">•</span> {item.label}
+                  <span className="hero-chip-pct">{item.pct}</span>
                 </button>
               ))}
             </div>
@@ -491,6 +480,328 @@ function Hero({ cfg, onFilterGame, onToast }) {
               </a>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- Games Matrix & Combat Radar Diagram ---------- */
+function GamesMatrix({ onFilterGame, activeGameFilter }) {
+  const [selectedGameId, setSelectedGameId] = useState('Fortnite Ranked');
+
+  const gamesData = [
+    {
+      id: 'Fortnite Ranked',
+      name: 'FORTNITE RANKED',
+      shortName: 'Fortnite',
+      pct: 45,
+      color: '#00d4ff',
+      rank: 'UNREAL',
+      subRank: '#1,420 Global PR',
+      role: 'Fragger & Endgame IGL',
+      kd: '4.9',
+      winRate: '28%',
+      matches: '1,240+',
+      hours: '620h',
+      primaryMeta: 'Gatekeeper Shotgun • Combat AR',
+      dropLocation: 'The Underworld',
+      clipCount: 6,
+      stats: { aim: 96, movement: 98, gameSense: 95, clutch: 98, mechanics: 99 }
+    },
+    {
+      id: 'Call of Duty: Warzone',
+      name: 'WARZONE RESURGENCE',
+      shortName: 'Warzone',
+      pct: 25,
+      color: '#ec4899',
+      rank: 'IRIDESCENT',
+      subRank: 'Division 1 Contender',
+      role: 'Aggressive Entry & Sniper',
+      kd: '3.8',
+      winRate: '24%',
+      matches: '780+',
+      hours: '340h',
+      primaryMeta: 'Striker 9 SMG • KATT-AMR Sniper',
+      dropLocation: 'Rebirth Island Prison',
+      clipCount: 4,
+      stats: { aim: 98, movement: 94, gameSense: 93, clutch: 96, mechanics: 91 }
+    },
+    {
+      id: 'Off The Grid',
+      name: 'OFF THE GRID',
+      shortName: 'Off The Grid',
+      pct: 18,
+      color: '#a855f7',
+      rank: 'CYBER APEX',
+      subRank: 'Top 500 Alpha Leaderboard',
+      role: 'Cyberlimb Kinetic Flanker',
+      kd: '4.4',
+      winRate: '31%',
+      matches: '340+',
+      hours: '190h',
+      primaryMeta: 'Ripper Carbine • Kinetic Blade',
+      dropLocation: 'Teardrop Island Core',
+      clipCount: 2,
+      stats: { aim: 94, movement: 99, gameSense: 92, clutch: 95, mechanics: 96 }
+    },
+    {
+      id: 'The Finals',
+      name: 'THE FINALS',
+      shortName: 'The Finals',
+      pct: 12,
+      color: '#ffb340',
+      rank: 'DIAMOND 1',
+      subRank: 'World Tour Qualifier',
+      role: 'Cashout Breacher & Heavy Shield',
+      kd: '3.2',
+      winRate: '35%',
+      matches: '210+',
+      hours: '120h',
+      primaryMeta: 'Lewis Gun • Mesh Shield • RPG',
+      dropLocation: 'Monaco Stadium',
+      clipCount: 2,
+      stats: { aim: 92, movement: 91, gameSense: 98, clutch: 94, mechanics: 93 }
+    }
+  ];
+
+  const current = gamesData.find(g => g.id === selectedGameId) || gamesData[0];
+
+  // 5 Radar Axes: Aim, Movement, Clutch, Game Sense, Mechanics
+  const axes = [
+    { key: 'aim', label: 'AIM', angle: -90 },
+    { key: 'movement', label: 'MOVEMENT', angle: -18 },
+    { key: 'clutch', label: 'CLUTCH', angle: 54 },
+    { key: 'gameSense', label: 'GAME SENSE', angle: 126 },
+    { key: 'mechanics', label: 'MECHANICS', angle: 198 }
+  ];
+
+  const getCoord = (angleDeg, radius) => {
+    const rad = (angleDeg * Math.PI) / 180;
+    return {
+      x: 160 + radius * Math.cos(rad),
+      y: 160 + radius * Math.sin(rad)
+    };
+  };
+
+  const rings = [0.25, 0.5, 0.75, 1.0];
+
+  const polyPoints = axes.map(axis => {
+    const val = current.stats[axis.key] || 90;
+    const r = (val / 100) * 105;
+    const { x, y } = getCoord(axis.angle, r);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+
+  return (
+    <section id="games" className="games-matrix-section" aria-labelledby="games-matrix-heading">
+      <div className="cinema-header-bar">
+        <div className="cinema-header-left">
+          <span className="cinema-red-accent" />
+          <h2 id="games-matrix-heading" className="cinema-heading-text mono">COMPETITIVE GAMES MATRIX</h2>
+          <span className="cinema-top-highlight-badge mono">COMBAT RADAR</span>
+        </div>
+        <div className="cinema-header-right mono">
+          <span className="games-season-badge mono">SEASON 2026 BENCHMARKS</span>
+        </div>
+      </div>
+
+      {/* Playtime Distribution Bar */}
+      <div className="playtime-bar-wrapper">
+        <div className="playtime-bar-header mono">
+          <span className="playtime-bar-title">STREAM & SCRIM TIME DISTRIBUTION</span>
+          <span className="playtime-bar-note dim">CLICK GAME TO INSPECT COMBAT ATTRIBUTES</span>
+        </div>
+
+        <div className="playtime-segmented-bar" role="tablist" aria-label="Game distribution bar">
+          {gamesData.map(g => (
+            <button
+              key={g.id}
+              type="button"
+              role="tab"
+              aria-selected={selectedGameId === g.id}
+              className={`playtime-bar-segment ${selectedGameId === g.id ? 'is-selected' : ''}`}
+              style={{ width: `${g.pct}%`, '--seg-color': g.color }}
+              onClick={() => setSelectedGameId(g.id)}
+              title={`${g.name}: ${g.pct}% focus`}
+            >
+              <span className="seg-label mono">{g.shortName}</span>
+              <span className="seg-pct mono">{g.pct}%</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Main Matrix Grid: Radar SVG Visualizer + Selected Game Attributes */}
+      <div className="games-diagram-grid">
+        {/* Radar Diagram Box */}
+        <div className="radar-visual-box">
+          <div className="radar-card-header mono">
+            <span className="radar-card-title">
+              <CrosshairsIcon size={14} /> COMBAT VECTOR RADAR
+            </span>
+            <span className="radar-game-tag" style={{ color: current.color }}>{current.shortName}</span>
+          </div>
+
+          <div className="radar-svg-container">
+            <svg viewBox="0 0 320 320" className="radar-svg" aria-label="Combat attributes radar chart">
+              <defs>
+                <radialGradient id="radarPurpleGrad" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#c084fc" stopOpacity="0.45" />
+                  <stop offset="60%" stopColor="#9333ea" stopOpacity="0.30" />
+                  <stop offset="100%" stopColor="#7e22ce" stopOpacity="0.10" />
+                </radialGradient>
+                <filter id="radarGlow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+              </defs>
+
+              {/* Concentric Pentagon Rings */}
+              {rings.map(ring => {
+                const ringPoints = axes.map(axis => {
+                  const { x, y } = getCoord(axis.angle, ring * 105);
+                  return `${x.toFixed(1)},${y.toFixed(1)}`;
+                }).join(' ');
+                return (
+                  <polygon
+                    key={ring}
+                    points={ringPoints}
+                    className="radar-ring-polygon"
+                  />
+                );
+              })}
+
+              {/* Radial Axis Spokes */}
+              {axes.map(axis => {
+                const outer = getCoord(axis.angle, 105);
+                return (
+                  <line
+                    key={axis.key}
+                    x1="160"
+                    y1="160"
+                    x2={outer.x}
+                    y2={outer.y}
+                    className="radar-spoke-line"
+                  />
+                );
+              })}
+
+              {/* Data Filled Polygon */}
+              <polygon
+                points={polyPoints}
+                className="radar-data-polygon"
+                fill="url(#radarPurpleGrad)"
+                filter="url(#radarGlow)"
+              />
+
+              {/* Vertex Nodes & Labels */}
+              {axes.map(axis => {
+                const val = current.stats[axis.key] || 90;
+                const pt = getCoord(axis.angle, (val / 100) * 105);
+                const labelPos = getCoord(axis.angle, 126);
+
+                return (
+                  <g key={axis.key} className="radar-vertex-group">
+                    <circle cx={pt.x} cy={pt.y} r="4" className="radar-vertex-dot" />
+                    <text
+                      x={labelPos.x}
+                      y={labelPos.y}
+                      textAnchor="middle"
+                      dominantBaseline="central"
+                      className="radar-axis-text mono"
+                    >
+                      {axis.label} ({val})
+                    </text>
+                  </g>
+                );
+              })}
+
+              {/* Center Rating Hub */}
+              <circle cx="160" cy="160" r="18" className="radar-center-circle" />
+              <text x="160" y="157" textAnchor="middle" dominantBaseline="central" className="radar-center-grade mono">
+                S+
+              </text>
+              <text x="160" y="169" textAnchor="middle" dominantBaseline="central" className="radar-center-score mono">
+                96
+              </text>
+            </svg>
+          </div>
+
+          <div className="radar-footer-summary mono">
+            <div className="r-foot-item">
+              <span className="dim">COMPOSITE COMBAT SCORE</span>
+              <strong>96 / 100 S+ TIER</strong>
+            </div>
+            <div className="r-foot-item">
+              <span className="dim">PRIMARY PLAYSTYLE</span>
+              <strong style={{ color: current.color }}>{current.role}</strong>
+            </div>
+          </div>
+        </div>
+
+        {/* Game Stats & Deep Breakdown Cards */}
+        <div className="games-cards-display">
+          {gamesData.map(g => {
+            const isSelected = g.id === selectedGameId;
+            const isFilterActive = activeGameFilter === g.id;
+
+            return (
+              <div
+                key={g.id}
+                className={`game-stat-card ${isSelected ? 'is-active-game' : ''}`}
+                onClick={() => setSelectedGameId(g.id)}
+              >
+                <div className="game-stat-head">
+                  <div className="game-stat-title-area">
+                    <span className="game-stat-name mono">{g.name}</span>
+                    <span className="game-stat-role mono dim">{g.role}</span>
+                  </div>
+                  <div className="game-rank-badge mono" style={{ borderColor: g.color, color: g.color }}>
+                    <TrophyIcon size={13} />
+                    <span>{g.rank}</span>
+                  </div>
+                </div>
+
+                <div className="game-stat-pills-row mono">
+                  <div className="g-stat-unit">
+                    <span className="g-stat-lbl">K/D</span>
+                    <strong className="g-stat-val">{g.kd}</strong>
+                  </div>
+                  <div className="g-stat-unit">
+                    <span className="g-stat-lbl">WIN %</span>
+                    <strong className="g-stat-val">{g.winRate}</strong>
+                  </div>
+                  <div className="g-stat-unit">
+                    <span className="g-stat-lbl">MATCHES</span>
+                    <strong className="g-stat-val">{g.matches}</strong>
+                  </div>
+                  <div className="g-stat-unit">
+                    <span className="g-stat-lbl">PLAYTIME</span>
+                    <strong className="g-stat-val">{g.hours}</strong>
+                  </div>
+                </div>
+
+                <div className="game-stat-meta-strip mono">
+                  <span className="dim">META:</span> {g.primaryMeta} • <span className="dim">DROP:</span> {g.dropLocation}
+                </div>
+
+                <div className="game-stat-actions">
+                  <button
+                    type="button"
+                    className={`btn-filter-game-vault mono ${isFilterActive ? 'is-active-filter' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onFilterGame(g.id);
+                    }}
+                  >
+                    <span>{isFilterActive ? `FILTERING VAULT: ${g.shortName.toUpperCase()}` : `VIEW ${g.clipCount} CLIPS IN VAULT`}</span>
+                    <FlameIcon size={13} />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -591,8 +902,8 @@ function CinemaSpotlight({ clip, logNo, queueClips, numbers, onSelectClip, onToa
           <span className="cinema-top-highlight-badge mono">TOP HIGHLIGHT</span>
         </div>
         <div className="cinema-header-right mono">
-          <span className="direct-kick-indicator">
-            <span className="status-dot-green pulse" /> DIRECT KICK FEED SYNCHRONIZED
+          <span className="cinema-vault-badge mono">
+            <KickIcon size={12} /> KICK HIGHLIGHT VAULT
           </span>
         </div>
       </div>
@@ -1152,7 +1463,7 @@ function Footer() {
 /* ---------- Mobile Bottom Navigation Dock ---------- */
 function MobileBottomNav({ activeTab, onSelectTab }) {
   const tabs = [
-    { key: 'live', href: '#home', label: 'Live', icon: <LiveRadarIcon size={18} /> },
+    { key: 'games', href: '#games', label: 'Games', icon: <GamepadIcon size={18} /> },
     { key: 'clips', href: '#clips', label: 'Clips', icon: <FlameIcon size={18} /> },
     { key: 'loadouts', href: '#loadouts', label: 'Loadouts', icon: <SlidersIcon size={18} /> },
     { key: 'hub', href: '#community', label: 'Hub', icon: <UsersIcon size={18} /> },
@@ -1341,6 +1652,11 @@ export function Home() {
             </p>
           </section>
         ) : null}
+
+        <GamesMatrix
+          onFilterGame={handleFilterGame}
+          activeGameFilter={activeGameFilter}
+        />
 
         {spotlightClip && (
           <CinemaSpotlight

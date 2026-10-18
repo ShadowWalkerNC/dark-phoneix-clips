@@ -26,8 +26,9 @@
   "twitchChannel": "",
   "kickChannel": "dark-phoneix",
   "theme": {
-    "accentColor": "#E63926",
+    "accentColor": "#A855F7",
+    "purpleColor": "#C084FC",
     "goldColor": "#FF9500",
-    "bgDark": "#0d0e10"
+    "bgDark": "#090510"
   }
 }
