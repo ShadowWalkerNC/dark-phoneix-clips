@@ -349,6 +349,14 @@ test('Public /api/status ignores ?force so visitors cannot hammer Twitch', async
   assert.strictEqual(res.status, 200);
 });
 
+test('Multi-page routes (/streams, /games, /clips, /loadouts, /community) serve index.html with 200 OK', async () => {
+  for (const page of ['/streams', '/games', '/clips', '/loadouts', '/community', '/schedule']) {
+    const res = await request(page);
+    assert.strictEqual(res.status, 200, `${page} should return 200 OK`);
+    assert.ok(res.body.includes('<!doctype html>') || res.body.includes('<!DOCTYPE html>'), `${page} should serve HTML`);
+  }
+});
+
 test('Tests did not touch the real data directory', () => {
   const real = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'status.json'), 'utf8'));
   assert.strictEqual(real.live, false);

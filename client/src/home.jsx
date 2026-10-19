@@ -252,7 +252,12 @@ function Header({ status, onOpenSearch, kickUrl, discordUrl, activeNav, onSelect
   return (
     <header className="bar">
       <div className="bar-left">
-        <a className="brand" href="#home" aria-label="Dark Phoenix, back to top">
+        <a
+          className="brand"
+          href="/streams"
+          aria-label="Dark Phoenix, return to streams"
+          onClick={(e) => { e.preventDefault(); onSelectNav('streams'); }}
+        >
           <PhoenixLogo size={36} className="brand-icon" />
           <span className="brand-text">DARK PHOENIX</span>
         </a>
@@ -261,37 +266,37 @@ function Header({ status, onOpenSearch, kickUrl, discordUrl, activeNav, onSelect
       {/* Desktop Navigation Links */}
       <nav aria-label="Primary" className="desktop-nav mono">
         <a
-          href="#home"
+          href="/streams"
           className={`nav-link ${activeNav === 'streams' ? 'is-active' : ''}`}
-          onClick={() => onSelectNav('streams')}
+          onClick={(e) => { e.preventDefault(); onSelectNav('streams'); }}
         >
           STREAMS
         </a>
         <a
-          href="#games"
+          href="/games"
           className={`nav-link ${activeNav === 'games' ? 'is-active' : ''}`}
-          onClick={() => onSelectNav('games')}
+          onClick={(e) => { e.preventDefault(); onSelectNav('games'); }}
         >
           GAMES MATRIX
         </a>
         <a
-          href="#clips"
+          href="/clips"
           className={`nav-link ${activeNav === 'clips' ? 'is-active' : ''}`}
-          onClick={() => onSelectNav('clips')}
+          onClick={(e) => { e.preventDefault(); onSelectNav('clips'); }}
         >
           CLIPS VAULT
         </a>
         <a
-          href="#loadouts"
+          href="/loadouts"
           className={`nav-link ${activeNav === 'loadouts' ? 'is-active' : ''}`}
-          onClick={() => onSelectNav('loadouts')}
+          onClick={(e) => { e.preventDefault(); onSelectNav('loadouts'); }}
         >
           LOADOUTS & META
         </a>
         <a
-          href="#community"
+          href="/community"
           className={`nav-link ${activeNav === 'community' ? 'is-active' : ''}`}
-          onClick={() => onSelectNav('community')}
+          onClick={(e) => { e.preventDefault(); onSelectNav('community'); }}
         >
           SCHEDULE & DISCORD
         </a>
@@ -1325,7 +1330,7 @@ function LoadoutsSection({ loadouts: propLoadouts, hardware: propHardware }) {
 }
 
 /* ---------- Global Footer ---------- */
-function Footer() {
+function Footer({ onNavigate }) {
   return (
     <footer className="footer-bar mono">
       <div className="footer-left">
@@ -1335,11 +1340,15 @@ function Footer() {
       </div>
 
       <div className="footer-right">
-        <a href="#home">TERMS</a>
+        <a href="/streams" onClick={(e) => { e.preventDefault(); onNavigate?.('streams'); }}>STREAMS</a>
         <span>•</span>
-        <a href="#home">PRIVACY</a>
+        <a href="/games" onClick={(e) => { e.preventDefault(); onNavigate?.('games'); }}>GAMES</a>
         <span>•</span>
-        <a href="#community">CREATOR GUIDELINES</a>
+        <a href="/clips" onClick={(e) => { e.preventDefault(); onNavigate?.('clips'); }}>VAULT</a>
+        <span>•</span>
+        <a href="/loadouts" onClick={(e) => { e.preventDefault(); onNavigate?.('loadouts'); }}>LOADOUTS</a>
+        <span>•</span>
+        <a href="/community" onClick={(e) => { e.preventDefault(); onNavigate?.('community'); }}>COMMUNITY</a>
       </div>
     </footer>
   );
@@ -1348,10 +1357,11 @@ function Footer() {
 /* ---------- Mobile Bottom Navigation Dock ---------- */
 function MobileBottomNav({ activeTab, onSelectTab }) {
   const tabs = [
-    { key: 'games', href: '#games', label: 'Games', icon: <GamepadIcon size={18} /> },
-    { key: 'clips', href: '#clips', label: 'Clips', icon: <FlameIcon size={18} /> },
-    { key: 'loadouts', href: '#loadouts', label: 'Loadouts', icon: <SlidersIcon size={18} /> },
-    { key: 'hub', href: '#community', label: 'Hub', icon: <UsersIcon size={18} /> },
+    { key: 'streams', href: '/streams', label: 'Live', icon: <PlayIcon size={18} /> },
+    { key: 'games', href: '/games', label: 'Games', icon: <GamepadIcon size={18} /> },
+    { key: 'clips', href: '/clips', label: 'Clips', icon: <FlameIcon size={18} /> },
+    { key: 'loadouts', href: '/loadouts', label: 'Loadouts', icon: <SlidersIcon size={18} /> },
+    { key: 'community', href: '/community', label: 'Hub', icon: <UsersIcon size={18} /> },
   ];
 
   return (
@@ -1361,7 +1371,7 @@ function MobileBottomNav({ activeTab, onSelectTab }) {
           key={t.key}
           href={t.href}
           className={`mobile-dock-item ${activeTab === t.key ? 'active' : ''}`}
-          onClick={() => onSelectTab(t.key)}
+          onClick={(e) => { e.preventDefault(); onSelectTab(t.key); }}
         >
           <span className="mobile-dock-icon">{t.icon}</span>
           <span className="mobile-dock-label mono">{t.label}</span>
@@ -1441,8 +1451,97 @@ function PlayerModal({ clip, logNo, onClose, onToast }) {
 
 /* ---------- Root Application ---------- */
 function hashClipId() {
+  if (typeof window === 'undefined') return null;
   const h = window.location.hash;
   return h.startsWith('#clip-') ? decodeURIComponent(h.slice(6)) : null;
+}
+
+function getPageFromUrl() {
+  if (typeof window === 'undefined') return 'streams';
+  const path = (window.location.pathname || '').toLowerCase().replace(/^\/+|\/+$/g, '');
+  const hash = (window.location.hash || '').toLowerCase().replace(/^#\/?/, '');
+
+  if (path === 'games') return 'games';
+  if (path === 'clips' || path === 'vault') return 'clips';
+  if (path === 'loadouts' || path === 'meta') return 'loadouts';
+  if (path === 'community' || path === 'schedule' || path === 'discord') return 'community';
+  if (path === 'streams' || path === '') {
+    if (hash === 'games') return 'games';
+    if (hash === 'clips' || hash === 'vault') return 'clips';
+    if (hash === 'loadouts') return 'loadouts';
+    if (hash === 'community' || hash === 'schedule') return 'community';
+    return 'streams';
+  }
+  return 'streams';
+}
+
+/* ---------- Quick Navigation Hub on Streams Page ---------- */
+function StreamsQuickHub({ onNavigate }) {
+  const hubs = [
+    {
+      page: 'games',
+      title: 'Competitive Games Matrix',
+      desc: 'Ranked progression, playtime split, and weapon meta across current competitive titles.',
+      cta: 'EXPLORE GAMES MATRIX →',
+      icon: <GamepadIcon size={20} />
+    },
+    {
+      page: 'clips',
+      title: 'Clips Vault & Highlights',
+      desc: 'Searchable archive of tournament 1v4 clutches, sniper aces, and stream highlights.',
+      cta: 'ENTER CLIPS VAULT →',
+      icon: <FlameIcon size={20} />
+    },
+    {
+      page: 'loadouts',
+      title: 'Weapon Loadouts & Hardware',
+      desc: 'Tournament-grade builds, attachment specs, in-game sensitivities, and audio tuning.',
+      cta: 'VIEW LOADOUT BUILDS →',
+      icon: <SlidersIcon size={20} />
+    },
+    {
+      page: 'community',
+      title: 'Schedule & Discord Bunker',
+      desc: 'Dynamic broadcast radar, browser stream alerts, and 4.2K member Discord community.',
+      cta: 'JOIN DISCORD BUNKER →',
+      icon: <UsersIcon size={20} />
+    }
+  ];
+
+  return (
+    <section className="streams-quick-hub" aria-label="Stream Hub Portals">
+      <div className="cinema-header-bar">
+        <div className="cinema-header-left">
+          <span className="cinema-red-accent" />
+          <h2 className="cinema-heading-text mono">PORTAL HUBS & VAULTS</h2>
+          <span className="cinema-top-highlight-badge mono">PAGES</span>
+        </div>
+      </div>
+      <div className="streams-quick-grid mono">
+        {hubs.map(item => (
+          <div
+            key={item.page}
+            className="quick-hub-card"
+            onClick={() => onNavigate(item.page)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => { if (e.key === 'Enter') onNavigate(item.page); }}
+          >
+            <div>
+              <div className="quick-hub-card-head">
+                <div className="quick-hub-icon-wrap">{item.icon}</div>
+                <h3 className="quick-hub-title">{item.title}</h3>
+              </div>
+              <p className="quick-hub-desc">{item.desc}</p>
+            </div>
+            <div className="quick-hub-btn">
+              <span>{item.cta}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
 }
 
 export function Home() {
@@ -1456,8 +1555,7 @@ export function Home() {
   const [activeGameFilter, setActiveGameFilter] = useState(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  const [activeNav, setActiveNav] = useState('streams');
-  const [mobileActiveTab, setMobileActiveTab] = useState('clips');
+  const [currentPage, setCurrentPage] = useState(() => getPageFromUrl());
 
   useEffect(() => {
     let cancelled = false;
@@ -1472,6 +1570,18 @@ export function Home() {
       .catch(() => { if (!cancelled) setFailed(true); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    const handleLocationChange = () => {
+      setCurrentPage(getPageFromUrl());
+    };
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
+    };
   }, []);
 
   const numbers = useMemo(() => numberClips(clips), [clips]);
@@ -1500,13 +1610,16 @@ export function Home() {
 
   const closeClip = () => {
     setModalId(null);
-    history.replaceState(null, '', window.location.pathname);
+    const path = currentPage === 'streams' ? '/' : `/${currentPage}`;
+    history.replaceState(null, '', path);
   };
 
-  const handleFilterGame = game => {
-    setActiveGameFilter(game);
-    const clipsEl = document.getElementById('clips');
-    if (clipsEl) clipsEl.scrollIntoView({ behavior: 'smooth' });
+  const navigateTo = (page, filterGame = null) => {
+    setCurrentPage(page);
+    if (filterGame) setActiveGameFilter(filterGame);
+    const path = page === 'streams' ? '/' : `/${page}`;
+    history.pushState(null, '', path);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -1519,17 +1632,11 @@ export function Home() {
         onOpenSearch={setIsSearchOpen}
         kickUrl={cfg.socials?.kick}
         discordUrl={cfg.socials?.discord}
-        activeNav={activeNav}
-        onSelectNav={setActiveNav}
+        activeNav={currentPage}
+        onSelectNav={navigateTo}
       />
 
       <main id="main">
-        <Hero
-          cfg={cfg}
-          onFilterGame={handleFilterGame}
-          onToast={msg => setToastMessage(msg)}
-        />
-
         {failed && !loading ? (
           <section className="vault-section" aria-label="Load error">
             <p className="errbar mono" role="alert">
@@ -1538,49 +1645,106 @@ export function Home() {
           </section>
         ) : null}
 
-        <GamesMatrix
-          games={cfg.gamesData}
-          onFilterGame={handleFilterGame}
-          activeGameFilter={activeGameFilter}
-        />
+        {/* PAGE 1: STREAMS / HOME COMMAND CENTER */}
+        {currentPage === 'streams' && (
+          <>
+            <Hero
+              cfg={cfg}
+              onFilterGame={game => navigateTo('clips', game)}
+              onToast={msg => setToastMessage(msg)}
+            />
 
-        {spotlightClip && (
-          <CinemaSpotlight
-            clip={spotlightClip}
-            logNo={pad3(numbers.get(spotlightClip.id))}
-            queueClips={queueClips}
-            numbers={numbers}
-            onSelectClip={id => setSelectedSpotlightId(id)}
-            onToast={msg => setToastMessage(msg)}
-          />
+            {spotlightClip && (
+              <CinemaSpotlight
+                clip={spotlightClip}
+                logNo={pad3(numbers.get(spotlightClip.id))}
+                queueClips={queueClips}
+                numbers={numbers}
+                onSelectClip={id => setSelectedSpotlightId(id)}
+                onToast={msg => setToastMessage(msg)}
+              />
+            )}
+
+            <StreamsQuickHub onNavigate={navigateTo} />
+          </>
         )}
 
-        <VaultArchive
-          clips={clips}
-          numbers={numbers}
-          loading={loading}
-          onOpen={openClip}
-          activeGameFilter={activeGameFilter}
-          onClearGameFilter={() => setActiveGameFilter(null)}
-          onToast={msg => setToastMessage(msg)}
-        />
+        {/* PAGE 2: COMPETITIVE GAMES MATRIX */}
+        {currentPage === 'games' && (
+          <>
+            <div className="page-header-banner">
+              <span className="mono hero-eyebrow">CAREER BENCHMARKS & STATS</span>
+              <h1 className="page-main-heading mono">COMPETITIVE GAMES MATRIX</h1>
+              <p className="page-main-sub mono dim">Ranked progression, playtime split, and weapon meta across current competitive titles.</p>
+            </div>
 
-        <LoadoutsSection
-          loadouts={cfg.loadouts}
-          hardware={cfg.hardware}
-        />
+            <GamesMatrix
+              games={cfg.gamesData}
+              onFilterGame={game => navigateTo('clips', game)}
+              activeGameFilter={activeGameFilter}
+            />
+          </>
+        )}
 
-        <BroadcastAndCommunity
-          cfg={cfg}
-          onToast={msg => setToastMessage(msg)}
-        />
+        {/* PAGE 3: CLIPS VAULT & ARCHIVE */}
+        {currentPage === 'clips' && (
+          <>
+            <div className="page-header-banner">
+              <span className="mono hero-eyebrow">HIGH-OCTANE HIGHLIGHT ARCHIVE</span>
+              <h1 className="page-main-heading mono">CLIPS VAULT</h1>
+              <p className="page-main-sub mono dim">Searchable vault of tournament 1v4 clutches, sniper aces, and stream highlights.</p>
+            </div>
+
+            <VaultArchive
+              clips={clips}
+              numbers={numbers}
+              loading={loading}
+              onOpen={openClip}
+              activeGameFilter={activeGameFilter}
+              onClearGameFilter={() => setActiveGameFilter(null)}
+              onToast={msg => setToastMessage(msg)}
+            />
+          </>
+        )}
+
+        {/* PAGE 4: WEAPON LOADOUTS & META */}
+        {currentPage === 'loadouts' && (
+          <>
+            <div className="page-header-banner">
+              <span className="mono hero-eyebrow">TACTICAL TUNING & RIG METRICS</span>
+              <h1 className="page-main-heading mono">WEAPON LOADOUTS & META</h1>
+              <p className="page-main-sub mono dim">Pro tournament loadouts, attachment specs, in-game sensitivities, and audio tuning.</p>
+            </div>
+
+            <LoadoutsSection
+              loadouts={cfg.loadouts}
+              hardware={cfg.hardware}
+            />
+          </>
+        )}
+
+        {/* PAGE 5: SCHEDULE & DISCORD BUNKER */}
+        {currentPage === 'community' && (
+          <>
+            <div className="page-header-banner">
+              <span className="mono hero-eyebrow">COMMUNITY RADAR & SQUAD BUNKER</span>
+              <h1 className="page-main-heading mono">SCHEDULE & DISCORD</h1>
+              <p className="page-main-sub mono dim">Live broadcast schedule, browser push alerts, and direct entry into the Discord bunker.</p>
+            </div>
+
+            <BroadcastAndCommunity
+              cfg={cfg}
+              onToast={msg => setToastMessage(msg)}
+            />
+          </>
+        )}
       </main>
 
-      <Footer />
+      <Footer onNavigate={navigateTo} />
 
       <MobileBottomNav
-        activeTab={mobileActiveTab}
-        onSelectTab={setMobileActiveTab}
+        activeTab={currentPage}
+        onSelectTab={navigateTo}
       />
 
       <SearchModal

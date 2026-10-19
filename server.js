@@ -81,6 +81,11 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(WEB_DIR, 'admin.html'));
 });
 
+// Multi-page SPA routes: deliver index.html for dedicated page views
+app.get(['/streams', '/games', '/clips', '/vault', '/loadouts', '/community', '/schedule'], (req, res) => {
+  res.sendFile(path.join(WEB_DIR, 'index.html'));
+});
+
 // Configuration reader (volume-persisted, editable from /admin)
 function getConfig() {
   return getSiteConfig();
