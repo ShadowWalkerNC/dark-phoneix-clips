@@ -245,9 +245,10 @@ function SearchModal({ isOpen, onClose, clips, onSelectClip }) {
 }
 
 /* ---------- Global Header Chrome (Desktop & Mobile) ---------- */
-function Header({ status, onOpenSearch, kickUrl, discordUrl, activeNav, onSelectNav }) {
+function Header({ status, onOpenSearch, kickUrl, discordUrl, fortniteGgUrl, activeNav, onSelectNav }) {
   const isLive = Boolean(status?.live !== false); // live indicator
   const liveUrl = kickUrl || 'https://kick.com/dark-phoneix';
+  const statsUrl = fortniteGgUrl || 'https://fortnite.gg/sprites?id=3847681';
 
   return (
     <header className="bar">
@@ -301,7 +302,7 @@ function Header({ status, onOpenSearch, kickUrl, discordUrl, activeNav, onSelect
           SCHEDULE & DISCORD
         </a>
         <a
-          href="https://fortnite.gg/stats?player=DARKPHOENIX_LOG"
+          href={statsUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="nav-link"
@@ -370,7 +371,7 @@ function Header({ status, onOpenSearch, kickUrl, discordUrl, activeNav, onSelect
 function Hero({ cfg, onFilterGame, onToast }) {
   const s = cfg.socials || {};
   const epicTag = cfg.epicTag || cfg.fortniteTag || 'DARKPHOENIX_LOG';
-  const fortniteGgUrl = cfg.fortniteGgUrl || s.fortniteGg || `https://fortnite.gg/stats?player=${encodeURIComponent(epicTag)}`;
+  const fortniteGgUrl = cfg.fortniteGgUrl || s.fortniteGg || 'https://fortnite.gg/sprites?id=3847681';
   const kickUrl = s.kick || 'https://kick.com/dark-phoneix';
   const discordUrl = s.discord || 'https://discord.com/users/darkphoenix';
   const rankedPr = cfg.rankedPr || '#1,420';
@@ -505,7 +506,7 @@ function GamesMatrix({ games, onFilterGame, activeGameFilter }) {
       name: 'FORTNITE RANKED',
       shortName: 'Fortnite',
       pct: 45,
-      color: '#00d4ff',
+      color: '#e63926',
       rank: 'UNREAL',
       subRank: '#1,420 Global PR',
       role: 'Fragger & Endgame IGL',
@@ -521,7 +522,7 @@ function GamesMatrix({ games, onFilterGame, activeGameFilter }) {
       name: 'WARZONE RESURGENCE',
       shortName: 'Warzone',
       pct: 25,
-      color: '#ec4899',
+      color: '#ff9500',
       rank: 'IRIDESCENT',
       subRank: 'Division 1 Contender',
       role: 'Aggressive Entry & Sniper',
@@ -537,7 +538,7 @@ function GamesMatrix({ games, onFilterGame, activeGameFilter }) {
       name: 'OFF THE GRID',
       shortName: 'Off The Grid',
       pct: 18,
-      color: '#a855f7',
+      color: '#ff453a',
       rank: 'CYBER APEX',
       subRank: 'Top 500 Alpha Leaderboard',
       role: 'Cyberlimb Kinetic Flanker',
@@ -596,7 +597,7 @@ function GamesMatrix({ games, onFilterGame, activeGameFilter }) {
               role="tab"
               aria-selected={selectedGameId === g.id}
               className={`playtime-bar-segment ${selectedGameId === g.id ? 'is-selected' : ''}`}
-              style={{ width: `${g.pct || 25}%`, '--seg-color': g.color || '#a855f7' }}
+              style={{ width: `${g.pct || 25}%`, '--seg-color': g.color || '#e63926' }}
               onClick={() => setSelectedGameId(g.id)}
               title={`${g.name}: ${g.pct}% focus`}
             >
@@ -624,7 +625,7 @@ function GamesMatrix({ games, onFilterGame, activeGameFilter }) {
                   <span className="game-stat-name mono">{g.name}</span>
                   <span className="game-stat-role mono dim">{g.role}</span>
                 </div>
-                <div className="game-rank-badge mono" style={{ borderColor: g.color || '#a855f7', color: g.color || '#a855f7' }}>
+                <div className="game-rank-badge mono" style={{ borderColor: g.color || '#e63926', color: g.color || '#e63926' }}>
                   <TrophyIcon size={13} />
                   <span>{g.rank}</span>
                 </div>
@@ -1632,6 +1633,7 @@ export function Home() {
         onOpenSearch={setIsSearchOpen}
         kickUrl={cfg.socials?.kick}
         discordUrl={cfg.socials?.discord}
+        fortniteGgUrl={cfg.fortniteGgUrl || cfg.socials?.fortniteGg || "https://fortnite.gg/sprites?id=3847681"}
         activeNav={currentPage}
         onSelectNav={navigateTo}
       />

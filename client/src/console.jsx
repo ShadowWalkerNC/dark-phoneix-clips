@@ -441,7 +441,7 @@ export function Console() {
               </div>
               <div className="frow">
                 <label className="afield">Epic Games gamer tag <input type="text" maxLength={60} placeholder="DarkPhoneix_LDG" value={profile.epicTag} onChange={set('epicTag')} /></label>
-                <label className="afield">Fortnite.gg profile URL <input type="url" placeholder="https://fortnite.gg/stats?player=DarkPhoneix_LDG" value={profile.fortniteGgUrl} onChange={set('fortniteGgUrl')} /></label>
+                <label className="afield">Fortnite.gg profile URL <input type="url" placeholder="https://fortnite.gg/sprites?id=3847681" value={profile.fortniteGgUrl} onChange={set('fortniteGgUrl')} /></label>
               </div>
               <div className="frow">
                 <label className="afield">Discord username / tag <input type="text" maxLength={60} placeholder="darkphoenix" value={profile.discordTag} onChange={set('discordTag')} /></label>
