@@ -368,6 +368,17 @@ function Hero({ cfg, onFilterGame, onToast }) {
   const fortniteGgUrl = cfg.fortniteGgUrl || s.fortniteGg || `https://fortnite.gg/stats?player=${encodeURIComponent(epicTag)}`;
   const kickUrl = s.kick || 'https://kick.com/dark-phoneix';
   const discordUrl = s.discord || 'https://discord.com/users/darkphoenix';
+  const rankedPr = cfg.rankedPr || '#1,420';
+  const discordMemberCount = cfg.discordMembers ? cfg.discordMembers.split(' ')[0] : '4,280';
+
+  const filterPills = Array.isArray(cfg.gamesData) && cfg.gamesData.length > 0
+    ? cfg.gamesData.map(g => ({ label: (g.name || g.id).toUpperCase(), game: g.id || g.name, pct: `${g.pct || 0}%` }))
+    : [
+        { label: 'FORTNITE RANKED', game: 'Fortnite Ranked', pct: '45%' },
+        { label: 'WARZONE RESURGENCE', game: 'Call of Duty: Warzone', pct: '25%' },
+        { label: 'OFF THE GRID', game: 'Off The Grid', pct: '18%' },
+        { label: 'THE FINALS', game: 'The Finals', pct: '12%' }
+      ];
 
   const copyEpicId = () => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
@@ -392,28 +403,23 @@ function Hero({ cfg, onFilterGame, onToast }) {
 
           <div className="hero-text-content">
             <div className="hero-title-row">
-              <h1 id="streamer-hero-title" className="hero-name">DARK PHOENIX</h1>
+              <h1 id="streamer-hero-title" className="hero-name">{cfg.gamerTag || 'DARK PHOENIX'}</h1>
               <span className="hero-verified-shield" title="Verified Competitive Streamer">
                 <VerifiedCheckIcon size={26} />
               </span>
             </div>
 
             <div className="hero-tags-headline mono">
-              <span>PC GAMER</span> • <span>FORTNITE GRINDER</span> • <span>TACTICAL RANKED</span> • <span>CONTENT CREATOR</span>
+              <span>{cfg.tagline || 'PC GAMER • FORTNITE GRINDER • TACTICAL RANKED • CONTENT CREATOR'}</span>
             </div>
 
             <p className="hero-description">
-              Ranked grinds, clutch 1v4 plays, high-kill lobbies, and pure squad chaos. Streaming competitive FPS & Battle Royale on Kick from the ashes.
+              {cfg.bio || 'Ranked grinds, clutch 1v4 plays, high-kill lobbies, and pure squad chaos. Streaming competitive FPS & Battle Royale on Kick from the ashes.'}
             </p>
 
             {/* Quick Game Filter Pills */}
             <div className="hero-game-pills mono" aria-label="Game Filter Shortcuts">
-              {[
-                { label: 'FORTNITE RANKED', game: 'Fortnite Ranked', pct: '45%' },
-                { label: 'WARZONE RESURGENCE', game: 'Call of Duty: Warzone', pct: '25%' },
-                { label: 'OFF THE GRID', game: 'Off The Grid', pct: '18%' },
-                { label: 'THE FINALS', game: 'The Finals', pct: '12%' }
-              ].map(item => (
+              {filterPills.map(item => (
                 <button
                   key={item.label}
                   type="button"
@@ -465,7 +471,7 @@ function Hero({ cfg, onFilterGame, onToast }) {
                 className="btn-hero-discord mono"
               >
                 <DiscordIcon size={16} />
-                <span>DISCORD (4.2K)</span>
+                <span>DISCORD ({discordMemberCount})</span>
               </a>
 
               <a
@@ -476,7 +482,7 @@ function Hero({ cfg, onFilterGame, onToast }) {
                 title="View Ranked Stats on Fortnite.gg"
               >
                 <TrophyIcon size={15} />
-                <span>Ranked PR: #1,420</span>
+                <span>Ranked PR: {rankedPr}</span>
               </a>
             </div>
           </div>
@@ -486,11 +492,9 @@ function Hero({ cfg, onFilterGame, onToast }) {
   );
 }
 
-/* ---------- Games Matrix & Combat Radar Diagram ---------- */
-function GamesMatrix({ onFilterGame, activeGameFilter }) {
-  const [selectedGameId, setSelectedGameId] = useState('Fortnite Ranked');
-
-  const gamesData = [
+/* ---------- Games & Ranks Section ---------- */
+function GamesMatrix({ games, onFilterGame, activeGameFilter }) {
+  const gamesList = Array.isArray(games) && games.length > 0 ? games : [
     {
       id: 'Fortnite Ranked',
       name: 'FORTNITE RANKED',
@@ -505,9 +509,7 @@ function GamesMatrix({ onFilterGame, activeGameFilter }) {
       matches: '1,240+',
       hours: '620h',
       primaryMeta: 'Gatekeeper Shotgun • Combat AR',
-      dropLocation: 'The Underworld',
-      clipCount: 6,
-      stats: { aim: 96, movement: 98, gameSense: 95, clutch: 98, mechanics: 99 }
+      dropLocation: 'The Underworld'
     },
     {
       id: 'Call of Duty: Warzone',
@@ -523,9 +525,7 @@ function GamesMatrix({ onFilterGame, activeGameFilter }) {
       matches: '780+',
       hours: '340h',
       primaryMeta: 'Striker 9 SMG • KATT-AMR Sniper',
-      dropLocation: 'Rebirth Island Prison',
-      clipCount: 4,
-      stats: { aim: 98, movement: 94, gameSense: 93, clutch: 96, mechanics: 91 }
+      dropLocation: 'Rebirth Island Prison'
     },
     {
       id: 'Off The Grid',
@@ -541,9 +541,7 @@ function GamesMatrix({ onFilterGame, activeGameFilter }) {
       matches: '340+',
       hours: '190h',
       primaryMeta: 'Ripper Carbine • Kinetic Blade',
-      dropLocation: 'Teardrop Island Core',
-      clipCount: 2,
-      stats: { aim: 94, movement: 99, gameSense: 92, clutch: 95, mechanics: 96 }
+      dropLocation: 'Teardrop Island Core'
     },
     {
       id: 'The Finals',
@@ -559,47 +557,19 @@ function GamesMatrix({ onFilterGame, activeGameFilter }) {
       matches: '210+',
       hours: '120h',
       primaryMeta: 'Lewis Gun • Mesh Shield • RPG',
-      dropLocation: 'Monaco Stadium',
-      clipCount: 2,
-      stats: { aim: 92, movement: 91, gameSense: 98, clutch: 94, mechanics: 93 }
+      dropLocation: 'Monaco Stadium'
     }
   ];
 
-  const current = gamesData.find(g => g.id === selectedGameId) || gamesData[0];
-
-  // 5 Radar Axes: Aim, Movement, Clutch, Game Sense, Mechanics
-  const axes = [
-    { key: 'aim', label: 'AIM', angle: -90 },
-    { key: 'movement', label: 'MOVEMENT', angle: -18 },
-    { key: 'clutch', label: 'CLUTCH', angle: 54 },
-    { key: 'gameSense', label: 'GAME SENSE', angle: 126 },
-    { key: 'mechanics', label: 'MECHANICS', angle: 198 }
-  ];
-
-  const getCoord = (angleDeg, radius) => {
-    const rad = (angleDeg * Math.PI) / 180;
-    return {
-      x: 160 + radius * Math.cos(rad),
-      y: 160 + radius * Math.sin(rad)
-    };
-  };
-
-  const rings = [0.25, 0.5, 0.75, 1.0];
-
-  const polyPoints = axes.map(axis => {
-    const val = current.stats[axis.key] || 90;
-    const r = (val / 100) * 105;
-    const { x, y } = getCoord(axis.angle, r);
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  }).join(' ');
+  const [selectedGameId, setSelectedGameId] = useState(gamesList[0]?.id || 'Fortnite Ranked');
 
   return (
     <section id="games" className="games-matrix-section" aria-labelledby="games-matrix-heading">
       <div className="cinema-header-bar">
         <div className="cinema-header-left">
           <span className="cinema-red-accent" />
-          <h2 id="games-matrix-heading" className="cinema-heading-text mono">COMPETITIVE GAMES MATRIX</h2>
-          <span className="cinema-top-highlight-badge mono">COMBAT RADAR</span>
+          <h2 id="games-matrix-heading" className="cinema-heading-text mono">COMPETITIVE GAMES & RANKS</h2>
+          <span className="cinema-top-highlight-badge mono">CAREER STATS</span>
         </div>
         <div className="cinema-header-right mono">
           <span className="games-season-badge mono">SEASON 2026 BENCHMARKS</span>
@@ -610,199 +580,94 @@ function GamesMatrix({ onFilterGame, activeGameFilter }) {
       <div className="playtime-bar-wrapper">
         <div className="playtime-bar-header mono">
           <span className="playtime-bar-title">STREAM & SCRIM TIME DISTRIBUTION</span>
-          <span className="playtime-bar-note dim">CLICK GAME TO INSPECT COMBAT ATTRIBUTES</span>
+          <span className="playtime-bar-note dim">SELECT A GAME TO FOCUS</span>
         </div>
 
         <div className="playtime-segmented-bar" role="tablist" aria-label="Game distribution bar">
-          {gamesData.map(g => (
+          {gamesList.map(g => (
             <button
               key={g.id}
               type="button"
               role="tab"
               aria-selected={selectedGameId === g.id}
               className={`playtime-bar-segment ${selectedGameId === g.id ? 'is-selected' : ''}`}
-              style={{ width: `${g.pct}%`, '--seg-color': g.color }}
+              style={{ width: `${g.pct || 25}%`, '--seg-color': g.color || '#a855f7' }}
               onClick={() => setSelectedGameId(g.id)}
               title={`${g.name}: ${g.pct}% focus`}
             >
-              <span className="seg-label mono">{g.shortName}</span>
+              <span className="seg-label mono">{g.shortName || g.name}</span>
               <span className="seg-pct mono">{g.pct}%</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Main Matrix Grid: Radar SVG Visualizer + Selected Game Attributes */}
-      <div className="games-diagram-grid">
-        {/* Radar Diagram Box */}
-        <div className="radar-visual-box">
-          <div className="radar-card-header mono">
-            <span className="radar-card-title">
-              <CrosshairsIcon size={14} /> COMBAT VECTOR RADAR
-            </span>
-            <span className="radar-game-tag" style={{ color: current.color }}>{current.shortName}</span>
-          </div>
+      {/* Clean, Full-Width Responsive Game Cards Grid (No Radar Box) */}
+      <div className="games-cards-display">
+        {gamesList.map(g => {
+          const isSelected = g.id === selectedGameId;
+          const isFilterActive = activeGameFilter === g.id;
 
-          <div className="radar-svg-container">
-            <svg viewBox="0 0 320 320" className="radar-svg" aria-label="Combat attributes radar chart">
-              <defs>
-                <radialGradient id="radarPurpleGrad" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#c084fc" stopOpacity="0.45" />
-                  <stop offset="60%" stopColor="#9333ea" stopOpacity="0.30" />
-                  <stop offset="100%" stopColor="#7e22ce" stopOpacity="0.10" />
-                </radialGradient>
-                <filter id="radarGlow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="3" result="blur" />
-                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                </filter>
-              </defs>
-
-              {/* Concentric Pentagon Rings */}
-              {rings.map(ring => {
-                const ringPoints = axes.map(axis => {
-                  const { x, y } = getCoord(axis.angle, ring * 105);
-                  return `${x.toFixed(1)},${y.toFixed(1)}`;
-                }).join(' ');
-                return (
-                  <polygon
-                    key={ring}
-                    points={ringPoints}
-                    className="radar-ring-polygon"
-                  />
-                );
-              })}
-
-              {/* Radial Axis Spokes */}
-              {axes.map(axis => {
-                const outer = getCoord(axis.angle, 105);
-                return (
-                  <line
-                    key={axis.key}
-                    x1="160"
-                    y1="160"
-                    x2={outer.x}
-                    y2={outer.y}
-                    className="radar-spoke-line"
-                  />
-                );
-              })}
-
-              {/* Data Filled Polygon */}
-              <polygon
-                points={polyPoints}
-                className="radar-data-polygon"
-                fill="url(#radarPurpleGrad)"
-                filter="url(#radarGlow)"
-              />
-
-              {/* Vertex Nodes & Labels */}
-              {axes.map(axis => {
-                const val = current.stats[axis.key] || 90;
-                const pt = getCoord(axis.angle, (val / 100) * 105);
-                const labelPos = getCoord(axis.angle, 126);
-
-                return (
-                  <g key={axis.key} className="radar-vertex-group">
-                    <circle cx={pt.x} cy={pt.y} r="4" className="radar-vertex-dot" />
-                    <text
-                      x={labelPos.x}
-                      y={labelPos.y}
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      className="radar-axis-text mono"
-                    >
-                      {axis.label} ({val})
-                    </text>
-                  </g>
-                );
-              })}
-
-              {/* Center Rating Hub */}
-              <circle cx="160" cy="160" r="18" className="radar-center-circle" />
-              <text x="160" y="157" textAnchor="middle" dominantBaseline="central" className="radar-center-grade mono">
-                S+
-              </text>
-              <text x="160" y="169" textAnchor="middle" dominantBaseline="central" className="radar-center-score mono">
-                96
-              </text>
-            </svg>
-          </div>
-
-          <div className="radar-footer-summary mono">
-            <div className="r-foot-item">
-              <span className="dim">COMPOSITE COMBAT SCORE</span>
-              <strong>96 / 100 S+ TIER</strong>
-            </div>
-            <div className="r-foot-item">
-              <span className="dim">PRIMARY PLAYSTYLE</span>
-              <strong style={{ color: current.color }}>{current.role}</strong>
-            </div>
-          </div>
-        </div>
-
-        {/* Game Stats & Deep Breakdown Cards */}
-        <div className="games-cards-display">
-          {gamesData.map(g => {
-            const isSelected = g.id === selectedGameId;
-            const isFilterActive = activeGameFilter === g.id;
-
-            return (
-              <div
-                key={g.id}
-                className={`game-stat-card ${isSelected ? 'is-active-game' : ''}`}
-                onClick={() => setSelectedGameId(g.id)}
-              >
-                <div className="game-stat-head">
-                  <div className="game-stat-title-area">
-                    <span className="game-stat-name mono">{g.name}</span>
-                    <span className="game-stat-role mono dim">{g.role}</span>
-                  </div>
-                  <div className="game-rank-badge mono" style={{ borderColor: g.color, color: g.color }}>
-                    <TrophyIcon size={13} />
-                    <span>{g.rank}</span>
-                  </div>
+          return (
+            <div
+              key={g.id}
+              className={`game-stat-card ${isSelected ? 'is-active-game' : ''}`}
+              onClick={() => setSelectedGameId(g.id)}
+            >
+              <div className="game-stat-head">
+                <div className="game-stat-title-area">
+                  <span className="game-stat-name mono">{g.name}</span>
+                  <span className="game-stat-role mono dim">{g.role}</span>
                 </div>
-
-                <div className="game-stat-pills-row mono">
-                  <div className="g-stat-unit">
-                    <span className="g-stat-lbl">K/D</span>
-                    <strong className="g-stat-val">{g.kd}</strong>
-                  </div>
-                  <div className="g-stat-unit">
-                    <span className="g-stat-lbl">WIN %</span>
-                    <strong className="g-stat-val">{g.winRate}</strong>
-                  </div>
-                  <div className="g-stat-unit">
-                    <span className="g-stat-lbl">MATCHES</span>
-                    <strong className="g-stat-val">{g.matches}</strong>
-                  </div>
-                  <div className="g-stat-unit">
-                    <span className="g-stat-lbl">PLAYTIME</span>
-                    <strong className="g-stat-val">{g.hours}</strong>
-                  </div>
-                </div>
-
-                <div className="game-stat-meta-strip mono">
-                  <span className="dim">META:</span> {g.primaryMeta} • <span className="dim">DROP:</span> {g.dropLocation}
-                </div>
-
-                <div className="game-stat-actions">
-                  <button
-                    type="button"
-                    className={`btn-filter-game-vault mono ${isFilterActive ? 'is-active-filter' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onFilterGame(g.id);
-                    }}
-                  >
-                    <span>{isFilterActive ? `FILTERING VAULT: ${g.shortName.toUpperCase()}` : `VIEW ${g.clipCount} CLIPS IN VAULT`}</span>
-                    <FlameIcon size={13} />
-                  </button>
+                <div className="game-rank-badge mono" style={{ borderColor: g.color || '#a855f7', color: g.color || '#a855f7' }}>
+                  <TrophyIcon size={13} />
+                  <span>{g.rank}</span>
                 </div>
               </div>
-            );
-          })}
-        </div>
+
+              <div className="game-stat-pills-row mono">
+                <div className="g-stat-unit">
+                  <span className="g-stat-lbl">K/D</span>
+                  <strong className="g-stat-val">{g.kd || '-'}</strong>
+                </div>
+                <div className="g-stat-unit">
+                  <span className="g-stat-lbl">WIN %</span>
+                  <strong className="g-stat-val">{g.winRate || '-'}</strong>
+                </div>
+                <div className="g-stat-unit">
+                  <span className="g-stat-lbl">MATCHES</span>
+                  <strong className="g-stat-val">{g.matches || '-'}</strong>
+                </div>
+                <div className="g-stat-unit">
+                  <span className="g-stat-lbl">PLAYTIME</span>
+                  <strong className="g-stat-val">{g.hours || '-'}</strong>
+                </div>
+              </div>
+
+              {(g.primaryMeta || g.dropLocation) && (
+                <div className="game-stat-meta-strip mono">
+                  {g.primaryMeta && <><span className="dim">META:</span> {g.primaryMeta}</>}
+                  {g.primaryMeta && g.dropLocation && ' • '}
+                  {g.dropLocation && <><span className="dim">DROP:</span> {g.dropLocation}</>}
+                </div>
+              )}
+
+              <div className="game-stat-actions">
+                <button
+                  type="button"
+                  className={`btn-filter-game-vault mono ${isFilterActive ? 'is-active-filter' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onFilterGame(g.id);
+                  }}
+                >
+                  <span>{isFilterActive ? `FILTERING VAULT: ${(g.shortName || g.name).toUpperCase()}` : `FILTER VAULT CLIPS`}</span>
+                  <FlameIcon size={13} />
+                </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
@@ -1246,23 +1111,35 @@ function BroadcastAndCommunity({ cfg, onToast }) {
 
           {/* 3 Schedule Boxes */}
           <div className="schedule-cards-row mono">
-            <div className="schedule-box active-today">
-              <span className="schedule-box-day">TODAY • MON</span>
-              <strong className="schedule-box-game">Fortnite Ranked</strong>
-              <span className="schedule-box-time">5:00 PM EST - LATE</span>
-            </div>
+            {Array.isArray(cfg.schedule) && cfg.schedule.length > 0 ? (
+              cfg.schedule.slice(0, 3).map((item, idx) => (
+                <div key={idx} className={`schedule-box ${idx === 0 ? 'active-today' : ''}`}>
+                  <span className="schedule-box-day">{item.days || 'SCHEDULE'}</span>
+                  <strong className="schedule-box-game">{item.activity || 'Ranked Stream'}</strong>
+                  <span className="schedule-box-time">{item.time || 'TBD'}</span>
+                </div>
+              ))
+            ) : (
+              <>
+                <div className="schedule-box active-today">
+                  <span className="schedule-box-day">TODAY • MON</span>
+                  <strong className="schedule-box-game">Fortnite Ranked</strong>
+                  <span className="schedule-box-time">5:00 PM EST - LATE</span>
+                </div>
 
-            <div className="schedule-box">
-              <span className="schedule-box-day">TUE / WED</span>
-              <strong className="schedule-box-game">Warzone Sweats</strong>
-              <span className="schedule-box-time">7:00 PM EST</span>
-            </div>
+                <div className="schedule-box">
+                  <span className="schedule-box-day">TUE / WED</span>
+                  <strong className="schedule-box-game">Warzone Sweats</strong>
+                  <span className="schedule-box-time">7:00 PM EST</span>
+                </div>
 
-            <div className="schedule-box">
-              <span className="schedule-box-day">WEEKENDS</span>
-              <strong className="schedule-box-game">Viewer 1v1 & Wagers</strong>
-              <span className="schedule-box-time">12:00 PM EST</span>
-            </div>
+                <div className="schedule-box">
+                  <span className="schedule-box-day">WEEKENDS</span>
+                  <strong className="schedule-box-game">Viewer 1v1 & Wagers</strong>
+                  <span className="schedule-box-time">12:00 PM EST</span>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Browser Push Notifications Box */}
@@ -1291,7 +1168,7 @@ function BroadcastAndCommunity({ cfg, onToast }) {
               <DiscordIcon size={18} className="discord-head-icon" />
               <h3 className="bunker-head-title mono">JOIN THE ASHES</h3>
             </div>
-            <span className="squad-members-badge mono">4,280 SQUAD MEMBERS</span>
+            <span className="squad-members-badge mono">{cfg.discordMembers ? cfg.discordMembers.toUpperCase() : '4,280 SQUAD MEMBERS'}</span>
           </div>
 
           <p className="bunker-p">
@@ -1337,26 +1214,26 @@ function BroadcastAndCommunity({ cfg, onToast }) {
 }
 
 /* ---------- Loadouts & Meta Sub-Section (Phase 4) ---------- */
-function LoadoutsSection() {
-  const loadouts = [
+function LoadoutsSection({ loadouts: propLoadouts, hardware: propHardware }) {
+  const loadouts = Array.isArray(propLoadouts) && propLoadouts.length > 0 ? propLoadouts : [
     {
       game: 'Fortnite Ranked',
-      tier: 'S-TIER META',
-      primary: 'Havoc Pump Shotgun',
-      primarySpecs: 'Red Dot Sight • Drum Magazine • Vertical Foregrip',
-      secondary: 'Striker AR',
-      secondarySpecs: 'Muzzle Brake • Extended Mag • Laser',
+      tier: 'TOURNAMENT META',
+      primary: 'Gatekeeper Shotgun',
+      primarySpecs: 'Drum Mag • Speed Foregrip • Muzzle Brake',
+      secondary: 'Combat Assault Rifle',
+      secondarySpecs: 'Extended Mag • Red Dot Optic • Angled Foregrip',
       utility: 'Shockwave Grenades & Flowberry Fizz',
       color: '#00d4ff'
     },
     {
       game: 'Call of Duty: Warzone',
-      tier: 'RESURGENCE META',
-      primary: 'Superi 46 SMG',
-      primarySpecs: 'Bore 99 Muzzle • Rescue-9 Stock • 40 Rnd Mag',
-      secondary: 'KATT-AMR Sniper',
-      secondarySpecs: 'Zang-34 Barrel • Sonic Suppressor • High Grain',
-      utility: 'Smoke Grenades & Semtex',
+      tier: 'S-TIER META',
+      primary: 'Striker 9 SMG',
+      primarySpecs: 'Sonic Suppressor • Striker Recon Barrel • 50 Rnd Drum • Sakin ZX Grip',
+      secondary: 'MCW Assault Rifle',
+      secondarySpecs: 'High Grain Ammo • Cyclone Long Barrel • L4R Flash Hider',
+      utility: 'Smoke Grenade & Semtex',
       color: '#ff453a'
     },
     {
@@ -1370,6 +1247,14 @@ function LoadoutsSection() {
       color: '#53fc18'
     }
   ];
+
+  const hw = propHardware || {
+    dpi: '800',
+    sens: '6.5% X / 6.5% Y',
+    ads: '1.0 NATIVE',
+    monitor: '240HZ FAST IPS',
+    audio: 'STUDIO IEMs + FOOTSTEP EQ'
+  };
 
   return (
     <section id="loadouts" className="loadouts-section" aria-labelledby="loadouts-heading">
@@ -1387,7 +1272,7 @@ function LoadoutsSection() {
             <div className="loadout-card-head">
               <div>
                 <span className="loadout-game-title mono">{item.game}</span>
-                <span className="loadout-tier-badge mono" style={{ color: item.color }}>{item.tier}</span>
+                <span className="loadout-tier-badge mono" style={{ color: item.color || '#00d4ff' }}>{item.tier}</span>
               </div>
               <GamepadIcon size={20} />
             </div>
@@ -1416,23 +1301,23 @@ function LoadoutsSection() {
       <div className="hardware-specs-strip mono">
         <div className="hw-unit">
           <span className="hw-label">DPI:</span>
-          <strong className="hw-value">800</strong>
+          <strong className="hw-value">{hw.dpi || '800'}</strong>
         </div>
         <div className="hw-unit">
           <span className="hw-label">SENSITIVITY:</span>
-          <strong className="hw-value">6.5% X / 6.5% Y</strong>
+          <strong className="hw-value">{hw.sens || '6.5% X / 6.5% Y'}</strong>
         </div>
         <div className="hw-unit">
           <span className="hw-label">ADS MULTIPLIER:</span>
-          <strong className="hw-value">1.0 NATIVE</strong>
+          <strong className="hw-value">{hw.ads || '1.0 NATIVE'}</strong>
         </div>
         <div className="hw-unit">
           <span className="hw-label">MONITOR:</span>
-          <strong className="hw-value">240HZ FAST IPS</strong>
+          <strong className="hw-value">{hw.monitor || '240HZ FAST IPS'}</strong>
         </div>
         <div className="hw-unit">
           <span className="hw-label">AUDIO:</span>
-          <strong className="hw-value">STUDIO IEMs + FOOTSTEP EQ</strong>
+          <strong className="hw-value">{hw.audio || 'STUDIO IEMs + FOOTSTEP EQ'}</strong>
         </div>
       </div>
     </section>
@@ -1654,6 +1539,7 @@ export function Home() {
         ) : null}
 
         <GamesMatrix
+          games={cfg.gamesData}
           onFilterGame={handleFilterGame}
           activeGameFilter={activeGameFilter}
         />
@@ -1679,7 +1565,10 @@ export function Home() {
           onToast={msg => setToastMessage(msg)}
         />
 
-        <LoadoutsSection />
+        <LoadoutsSection
+          loadouts={cfg.loadouts}
+          hardware={cfg.hardware}
+        />
 
         <BroadcastAndCommunity
           cfg={cfg}

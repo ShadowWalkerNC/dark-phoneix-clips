@@ -125,6 +125,15 @@ export function Console() {
       fortniteTag: cfg.fortniteTag || '',
       fortniteGgUrl: cfg.fortniteGgUrl || '',
       discordTag: cfg.discordTag || '',
+      rankedPr: cfg.rankedPr || '#1,420',
+      discordMembers: cfg.discordMembers || '4,280 Squad Members',
+      hwDpi: cfg.hardware?.dpi || '800',
+      hwSens: cfg.hardware?.sens || '6.5% X / 6.5% Y',
+      hwAds: cfg.hardware?.ads || '1.0 NATIVE',
+      hwMonitor: cfg.hardware?.monitor || '240HZ FAST IPS',
+      hwAudio: cfg.hardware?.audio || 'STUDIO IEMs + FOOTSTEP EQ',
+      gamesDataJson: JSON.stringify(cfg.gamesData || [], null, 2),
+      loadoutsJson: JSON.stringify(cfg.loadouts || [], null, 2),
       showTwitch: cfg.showTwitch === true,
       showYouTube: cfg.showYouTube === true,
       showKick: cfg.showKick !== false,
@@ -168,10 +177,34 @@ export function Console() {
     e.preventDefault();
     setProfileMsg('Saving…');
     setProfileOk(null);
+
+    let parsedGames = undefined;
+    if (profile.gamesDataJson && profile.gamesDataJson.trim()) {
+      try {
+        parsedGames = JSON.parse(profile.gamesDataJson);
+      } catch (err) {
+        setProfileMsg(`Invalid JSON in Games Matrix: ${err.message}`);
+        setProfileOk(false);
+        return;
+      }
+    }
+
+    let parsedLoadouts = undefined;
+    if (profile.loadoutsJson && profile.loadoutsJson.trim()) {
+      try {
+        parsedLoadouts = JSON.parse(profile.loadoutsJson);
+      } catch (err) {
+        setProfileMsg(`Invalid JSON in Loadouts & Meta: ${err.message}`);
+        setProfileOk(false);
+        return;
+      }
+    }
+
     const schedule = profile.schedule.split('\n').map(line => {
       const [days = '', time = '', activity = ''] = line.split('|').map(p => p.trim());
       return { days, time, activity };
     }).filter(r => r.days || r.time || r.activity);
+
     try {
       const data = await postJson('/api/config', {
         gamerTag: profile.gamerTag,
@@ -184,6 +217,17 @@ export function Console() {
         fortniteTag: profile.epicTag || profile.fortniteTag,
         fortniteGgUrl: profile.fortniteGgUrl,
         discordTag: profile.discordTag,
+        rankedPr: profile.rankedPr,
+        discordMembers: profile.discordMembers,
+        hardware: {
+          dpi: profile.hwDpi,
+          sens: profile.hwSens,
+          ads: profile.hwAds,
+          monitor: profile.hwMonitor,
+          audio: profile.hwAudio
+        },
+        gamesData: parsedGames,
+        loadouts: parsedLoadouts,
         showTwitch: Boolean(profile.showTwitch),
         showYouTube: Boolean(profile.showYouTube),
         showKick: profile.showKick !== false,
@@ -444,6 +488,34 @@ export function Console() {
                     style={{ width: 18, height: 18, cursor: 'pointer' }}
                   />
                   <span>Show YouTube on public page (hidden for now)</span>
+                </label>
+              </div>
+              <div className="frow">
+                <label className="afield">Ranked PR badge <input type="text" maxLength={60} placeholder="#1,420" value={profile.rankedPr} onChange={set('rankedPr')} /></label>
+                <label className="afield">Discord squad members count <input type="text" maxLength={60} placeholder="4,280 Squad Members" value={profile.discordMembers} onChange={set('discordMembers')} /></label>
+              </div>
+              <h3 style={{ margin: '16px 0 8px 0', fontSize: '0.95rem', letterSpacing: '0.05em', color: '#ff453a' }}>HARDWARE & SENSITIVITY SPECS</h3>
+              <div className="frow">
+                <label className="afield">Mouse DPI <input type="text" maxLength={40} placeholder="800" value={profile.hwDpi} onChange={set('hwDpi')} /></label>
+                <label className="afield">In-Game Sensitivity <input type="text" maxLength={60} placeholder="6.5% X / 6.5% Y" value={profile.hwSens} onChange={set('hwSens')} /></label>
+              </div>
+              <div className="frow">
+                <label className="afield">ADS Sensitivity <input type="text" maxLength={60} placeholder="1.0 NATIVE" value={profile.hwAds} onChange={set('hwAds')} /></label>
+                <label className="afield">Monitor / Refresh Rate <input type="text" maxLength={60} placeholder="240HZ FAST IPS" value={profile.hwMonitor} onChange={set('hwMonitor')} /></label>
+              </div>
+              <div className="frow single">
+                <label className="afield">Audio Setup & EQ <input type="text" maxLength={80} placeholder="STUDIO IEMs + FOOTSTEP EQ" value={profile.hwAudio} onChange={set('hwAudio')} /></label>
+              </div>
+              <h3 style={{ margin: '16px 0 8px 0', fontSize: '0.95rem', letterSpacing: '0.05em', color: '#ff453a' }}>WEAPON LOADOUTS & META BUILDS (JSON)</h3>
+              <div className="frow single">
+                <label className="afield">Loadouts data array (edit weapons, attachments, tiers, colors)
+                  <textarea rows={8} style={{ fontFamily: 'monospace', fontSize: '12px' }} value={profile.loadoutsJson} onChange={set('loadoutsJson')} />
+                </label>
+              </div>
+              <h3 style={{ margin: '16px 0 8px 0', fontSize: '0.95rem', letterSpacing: '0.05em', color: '#ff453a' }}>COMPETITIVE GAMES MATRIX & STATS (JSON)</h3>
+              <div className="frow single">
+                <label className="afield">Games data array (edit ranks, K/D, win rate, hours, drop locations)
+                  <textarea rows={10} style={{ fontFamily: 'monospace', fontSize: '12px' }} value={profile.gamesDataJson} onChange={set('gamesDataJson')} />
                 </label>
               </div>
               <div className="frow single">
