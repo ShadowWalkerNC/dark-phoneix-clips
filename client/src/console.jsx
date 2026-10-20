@@ -1,87 +1,72 @@
 import { useEffect, useState } from 'react';
 import { getJson, postJson } from './lib/api.js';
 import { fmtDate, fmtViews, platformLabel, vibeLabel } from './lib/format.js';
-import { PhoenixLogo } from './lib/icons.jsx';
+import {
+  PhoenixLogo,
+  KickIcon,
+  TwitchIcon,
+  YouTubeIcon,
+  DiscordIcon,
+  FortniteIcon,
+  GamepadIcon,
+  FlameIcon,
+  CrosshairsIcon,
+  CrownIcon,
+  SlidersIcon,
+  ClockIcon,
+  MonitorIcon,
+  CopyIcon,
+  CheckmarkIcon,
+  ExternalLinkIcon,
+  UsersIcon,
+  PlayIcon
+} from './lib/icons.jsx';
 
-/* ---------- Pieces ---------- */
+/* ---------- Utility Components ---------- */
 
 function CheckRow({ ok, label, hint }) {
   return (
-    <li>
-      <span className={`dot ${ok ? 'ok' : 'no'}`}>{ok ? '[ok]' : '[--]'}</span>
-      <span>{label}{hint ? <small>{hint}</small> : null}</span>
+    <li className={`check-item ${ok ? 'is-ok' : 'is-pending'}`}>
+      <span className={`check-dot ${ok ? 'ok' : 'pending'}`}>
+        {ok ? '✓' : '—'}
+      </span>
+      <div className="check-text">
+        <span className="check-label">{label}</span>
+        {hint ? <small className="check-hint">{hint}</small> : null}
+      </div>
     </li>
   );
 }
 
-function Msg({ text, ok }) {
-  if (!text) return <p className="msg" role="status" aria-live="polite"></p>;
-  return <p className={`msg${ok === true ? ' ok' : ok === false ? ' err' : ''}`} role="status" aria-live="polite">{text}</p>;
-}
-
-function Guide({ baseUrl }) {
-  const base = (baseUrl || '').replace(/\/$/, '');
+function StatusToast({ message, type }) {
+  if (!message) return null;
   return (
-    <>
-      <p className="hint">Setup walkthrough — open each, follow the steps, done. The checklist turns green as you go.</p>
-      <details className="guide" open>
-        <summary>1 · Twitch auto-sync + LIVE badge (~5 min)</summary>
-        <ol>
-          <li>Register an app at <a href="https://dev.twitch.tv/console/apps" target="_blank" rel="noopener noreferrer">dev.twitch.tv/console/apps</a> → Register Your Application. Name it anything, set the OAuth Redirect URL to <code>{base}/auth/twitch/callback</code>, category Website Integration → Create. Copy the <strong>Client ID</strong>, then create + copy a <strong>Client Secret</strong>.</li>
-          <li>Find your numeric broadcaster ID: open <code>https://decapi.me/twitch/id/YOUR-TWITCH-NAME</code> (swap in your name) — the number it returns is the ID.</li>
-          <li>In the Railway dashboard (service → Variables tab) add: <code>TWITCH_CLIENT_ID</code>, <code>TWITCH_CLIENT_SECRET</code>, <code>TWITCH_BROADCASTER_ID</code>. (If <code>TWITCH_EVENTSUB_SECRET</code> is missing, add any random string.) Saving redeploys automatically.</li>
-          <li>Back here, hit <strong>Connect Twitch</strong> above → authorize with your Twitch account → copy the <code>TWITCH_REFRESH_TOKEN</code> shown on screen into Railway Variables.</li>
-          <li>Refresh this page — the Twitch rows go green. The LIVE badge and post-stream clip pulls now work.</li>
-        </ol>
-      </details>
-      <details className="guide">
-        <summary>2 · YouTube auto-sync + new-video alerts (~7 min)</summary>
-        <ol>
-          <li>In the <a href="https://console.cloud.google.com" target="_blank" rel="noopener noreferrer">Google Cloud Console</a> create a project, then enable the <strong>YouTube Data API v3</strong> (APIs &amp; Services → Library).</li>
-          <li>APIs &amp; Services → OAuth consent screen → External → app name + your email → add the <code>.../auth/youtube.readonly</code> scope → add yourself as a test user.</li>
-          <li>Credentials → Create Credentials → OAuth client ID → Web application → Authorized redirect URI: <code>{base}/auth/youtube/callback</code> → copy the <strong>Client ID</strong> + <strong>Client Secret</strong>.</li>
-          <li>Find your channel ID: it starts with <code>UC</code> — your channel URL or YouTube Settings → Advanced settings.</li>
-          <li>In Railway Variables add: <code>YOUTUBE_CLIENT_ID</code>, <code>YOUTUBE_CLIENT_SECRET</code>, <code>YOUTUBE_CHANNEL_ID</code>.</li>
-          <li>Back here, hit <strong>Connect YouTube</strong> → authorize with your Google account → copy the <code>YOUTUBE_REFRESH_TOKEN</code> into Railway Variables.</li>
-          <li>Refresh this page — the YouTube rows go green. New uploads appear automatically.</li>
-        </ol>
-      </details>
-      <details className="guide">
-        <summary>3 · Discord alerts (~2 min)</summary>
-        <ol>
-          <li>In your Discord server: channel Settings → Integrations → Webhooks → New Webhook → Copy Webhook URL.</li>
-          <li>In Railway Variables add it as <code>DISCORD_WEBHOOK_URL</code>.</li>
-          <li>Hit <strong>Send Discord test</strong> in the Setup tab — the message should land in the channel. Going live and new YouTube uploads will post there too.</li>
-          <li>Paste your server invite link in the Page tab so followers can join.</li>
-        </ol>
-      </details>
-      <details className="guide">
-        <summary>4 · Railway Variables + password</summary>
-        <ol>
-          <li>Open the Railway project → your service → <strong>Variables</strong> tab → + New Variable → paste name + value. Every save redeploys by itself; then refresh this page.</li>
-          <li>Change the default Admin password: set a new <code>ADMIN_PASS</code> (and <code>ADMIN_USER</code> if you like) in Variables. The checklist stops nagging once the defaults are gone.</li>
-          <li>Rule of thumb: page content lives here in <code>/admin</code>, secrets live in Railway Variables. If a Connect button says “not configured”, that variable is still empty.</li>
-        </ol>
-      </details>
-    </>
+    <div className={`status-toast ${type === 'err' ? 'is-err' : 'is-ok'}`} role="status">
+      <span>{type === 'err' ? '⚠ ' : '✓ '}{message}</span>
+    </div>
   );
 }
 
 const VIBES = ['clutch', 'ace', 'funny', 'epic', 'highlight'];
-const TABS = [
-  ['setup', 'Setup'],
-  ['page', 'Page'],
-  ['connections', 'Connections'],
-  ['clips', 'Clips']
+
+const ADMIN_TABS = [
+  { id: 'profile', label: 'Profile & Brand', icon: '🎮' },
+  { id: 'clips', label: 'Clips Vault', icon: '🎬' },
+  { id: 'games', label: 'Games Matrix', icon: '🏆' },
+  { id: 'loadouts', label: 'Weapon Loadouts', icon: '🔫' },
+  { id: 'hardware', label: 'Rig & Hardware', icon: '⚙️' },
+  { id: 'schedule', label: 'Stream Schedule', icon: '📅' },
+  { id: 'integrations', label: 'Integrations & Setup', icon: '⚡' }
 ];
 
-/* ---------- Root ---------- */
+/* ---------- Main Admin Console ---------- */
 
 export function Console() {
-  const [authed, setAuthed] = useState(null); // null = checking
-  const [tab, setTab] = useState('setup');
+  const [authed, setAuthed] = useState(null); // null = checking session
+  const [activeTab, setActiveTab] = useState('profile');
   const [setup, setSetup] = useState(null);
   const [clips, setClips] = useState([]);
+  const [clipFilter, setClipFilter] = useState('');
 
   // Login form
   const [user, setUser] = useState('');
@@ -90,72 +75,93 @@ export function Console() {
   const [loginMsg, setLoginMsg] = useState('');
   const [loginErr, setLoginErr] = useState(false);
 
-  // Profile form (mirrors server config shape)
+  // Profile state
   const [profile, setProfile] = useState(null);
-  const [profileMsg, setProfileMsg] = useState('');
-  const [profileOk, setProfileOk] = useState(null);
+  const [savedProfile, setSavedProfile] = useState(null);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [saveStatus, setSaveStatus] = useState({ text: '', type: '' });
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Add-clip form
-  const [add, setAdd] = useState({ url: '', title: '', game: '', vibe: '', featured: false });
+  // Advanced raw JSON modal toggles
+  const [showGamesJson, setShowGamesJson] = useState(false);
+  const [showLoadoutsJson, setShowLoadoutsJson] = useState(false);
+
+  // Add clip form
+  const [add, setAdd] = useState({ url: '', title: '', game: 'Fortnite Ranked', vibe: 'clutch', featured: false });
   const [addMsg, setAddMsg] = useState('');
   const [addOk, setAddOk] = useState(null);
 
-  const [actionsMsg, setActionsMsg] = useState('');
-  const [actionsOk, setActionsOk] = useState(null);
+  // Action status (sync / discord test)
+  const [actionMsg, setActionMsg] = useState('');
+  const [actionOk, setActionOk] = useState(null);
 
   useEffect(() => {
     getJson('/api/me', { admin: false }).then(me => setAuthed(me.admin === true));
   }, []);
 
-  const reload = async () => {
-    const [s, cfg, v] = await Promise.all([
-      getJson('/api/setup-status', null),
-      getJson('/api/config', {}),
-      getJson('/api/clips', [])
-    ]);
-    setSetup(s);
-    setProfile({
-      gamerTag: cfg.gamerTag || '',
-      twitchChannel: cfg.twitchChannel || '',
-      title: cfg.title || '',
-      tagline: cfg.tagline || '',
-      bio: cfg.bio || '',
-      device: cfg.device || 'PC',
-      epicTag: cfg.epicTag || cfg.fortniteTag || '',
-      fortniteTag: cfg.fortniteTag || '',
-      fortniteGgUrl: cfg.fortniteGgUrl || '',
-      discordTag: cfg.discordTag || '',
-      rankedPr: cfg.rankedPr || '#1,420',
-      discordMembers: cfg.discordMembers || '4,280 Squad Members',
-      hwDpi: cfg.hardware?.dpi || '800',
-      hwSens: cfg.hardware?.sens || '6.5% X / 6.5% Y',
-      hwAds: cfg.hardware?.ads || '1.0 NATIVE',
-      hwMonitor: cfg.hardware?.monitor || '240HZ FAST IPS',
-      hwAudio: cfg.hardware?.audio || 'STUDIO IEMs + FOOTSTEP EQ',
-      gamesDataJson: JSON.stringify(cfg.gamesData || [], null, 2),
-      loadoutsJson: JSON.stringify(cfg.loadouts || [], null, 2),
-      showTwitch: cfg.showTwitch === true,
-      showYouTube: cfg.showYouTube === true,
-      showKick: cfg.showKick !== false,
-      scheduleNote: cfg.scheduleNote || '',
-      games: (cfg.primaryGames || []).join(', '),
-      twitch: cfg.socials?.twitch || '',
-      youtube: cfg.socials?.youtube || '',
-      discord: cfg.socials?.discord || '',
-      twitter: cfg.socials?.twitter || '',
-      kick: cfg.socials?.kick || '',
-      schedule: (cfg.schedule || []).map(r => [r.days, r.time, r.activity].join(' | ')).join('\n')
-    });
-    setClips(Array.isArray(v) ? v : []);
+  const reloadData = async () => {
+    try {
+      const [s, cfg, v] = await Promise.all([
+        getJson('/api/setup-status', null),
+        getJson('/api/config', {}),
+        getJson('/api/clips', [])
+      ]);
+      setSetup(s);
+
+      const loadedProfile = {
+        gamerTag: cfg.gamerTag || 'Dark Phoenix',
+        title: cfg.title || 'Dark Phoenix | Clips Vault & Kick Stream',
+        tagline: cfg.tagline || 'Tactical Ranked Specialist • Battle Royale & Arena Content Creator.',
+        bio: cfg.bio || '',
+        device: cfg.device || 'PC (Mouse & Keyboard • 240Hz)',
+        epicTag: cfg.epicTag || cfg.fortniteTag || 'DARKPHOENIX_LOG',
+        fortniteTag: cfg.fortniteTag || cfg.epicTag || 'DARKPHOENIX_LOG',
+        fortniteGgUrl: cfg.fortniteGgUrl || 'https://fortnite.gg/sprites?id=3847681',
+        discordTag: cfg.discordTag || 'darkphoenix',
+        rankedPr: cfg.rankedPr || '#1,420 Global PR',
+        discordMembers: cfg.discordMembers || '4,280 Squad Members',
+        primaryGames: Array.isArray(cfg.primaryGames) ? cfg.primaryGames : ['Fortnite Ranked', 'Call of Duty: Warzone', 'Off The Grid', 'The Finals'],
+        gamesData: Array.isArray(cfg.gamesData) ? cfg.gamesData : [],
+        loadouts: Array.isArray(cfg.loadouts) ? cfg.loadouts : [],
+        hardware: {
+          dpi: cfg.hardware?.dpi || '800',
+          sens: cfg.hardware?.sens || '6.5% X / 6.5% Y',
+          ads: cfg.hardware?.ads || '1.0 NATIVE',
+          monitor: cfg.hardware?.monitor || '240HZ FAST IPS',
+          audio: cfg.hardware?.audio || 'STUDIO IEMs + FOOTSTEP EQ'
+        },
+        schedule: Array.isArray(cfg.schedule) ? cfg.schedule : [],
+        scheduleNote: cfg.scheduleNote || 'Live broadcast radar synced. Stream alerts & community drops are announced in Discord #live-stream-pings.',
+        socials: {
+          kick: cfg.socials?.kick || 'https://kick.com/dark-phoneix',
+          discord: cfg.socials?.discord || 'https://discord.com/users/darkphoenix',
+          fortniteGg: cfg.socials?.fortniteGg || cfg.fortniteGgUrl || 'https://fortnite.gg/sprites?id=3847681',
+          twitch: cfg.socials?.twitch || '',
+          youtube: cfg.socials?.youtube || '',
+          twitter: cfg.socials?.twitter || ''
+        },
+        twitchChannel: cfg.twitchChannel || '',
+        showTwitch: Boolean(cfg.showTwitch),
+        showYouTube: Boolean(cfg.showYouTube),
+        showKick: cfg.showKick !== false
+      };
+
+      setProfile(loadedProfile);
+      setSavedProfile(JSON.parse(JSON.stringify(loadedProfile)));
+      setClips(Array.isArray(v) ? v : []);
+      setHasChanges(false);
+    } catch (err) {
+      console.error('Failed to load admin data:', err);
+    }
   };
 
   useEffect(() => {
-    if (authed) reload().catch(() => {});
+    if (authed) reloadData();
   }, [authed]);
 
-  const login = async e => {
+  const handleLogin = async e => {
     e.preventDefault();
-    setLoginMsg('Logging in…');
+    setLoginMsg('Authenticating…');
     setLoginErr(false);
     try {
       await postJson('/api/login', { user, pass });
@@ -163,52 +169,173 @@ export function Console() {
       setLoginMsg('');
       setAuthed(true);
     } catch (err) {
-      setLoginMsg(err.message);
+      setLoginMsg(err.message || 'Invalid username or password');
       setLoginErr(true);
     }
   };
 
-  const logout = async () => {
+  const handleLogout = async () => {
     await postJson('/api/logout', {}).catch(() => {});
     setAuthed(false);
   };
 
-  const saveProfile = async e => {
-    e.preventDefault();
-    setProfileMsg('Saving…');
-    setProfileOk(null);
+  /* Form mutations */
+  const updateField = (key, val) => {
+    setProfile(prev => {
+      const next = { ...prev, [key]: val };
+      setHasChanges(true);
+      return next;
+    });
+  };
 
-    let parsedGames = undefined;
-    if (profile.gamesDataJson && profile.gamesDataJson.trim()) {
-      try {
-        parsedGames = JSON.parse(profile.gamesDataJson);
-      } catch (err) {
-        setProfileMsg(`Invalid JSON in Games Matrix: ${err.message}`);
-        setProfileOk(false);
-        return;
-      }
-    }
+  const updateHardware = (key, val) => {
+    setProfile(prev => {
+      const next = {
+        ...prev,
+        hardware: { ...prev.hardware, [key]: val }
+      };
+      setHasChanges(true);
+      return next;
+    });
+  };
 
-    let parsedLoadouts = undefined;
-    if (profile.loadoutsJson && profile.loadoutsJson.trim()) {
-      try {
-        parsedLoadouts = JSON.parse(profile.loadoutsJson);
-      } catch (err) {
-        setProfileMsg(`Invalid JSON in Loadouts & Meta: ${err.message}`);
-        setProfileOk(false);
-        return;
-      }
-    }
+  const updateSocial = (key, val) => {
+    setProfile(prev => {
+      const next = {
+        ...prev,
+        socials: { ...prev.socials, [key]: val }
+      };
+      setHasChanges(true);
+      return next;
+    });
+  };
 
-    const schedule = profile.schedule.split('\n').map(line => {
-      const [days = '', time = '', activity = ''] = line.split('|').map(p => p.trim());
-      return { days, time, activity };
-    }).filter(r => r.days || r.time || r.activity);
+  /* Games Matrix mutations */
+  const updateGame = (idx, field, val) => {
+    setProfile(prev => {
+      const updated = [...prev.gamesData];
+      updated[idx] = { ...updated[idx], [field]: val };
+      setHasChanges(true);
+      return { ...prev, gamesData: updated };
+    });
+  };
+
+  const addGame = () => {
+    setProfile(prev => {
+      const newGame = {
+        id: `Game ${prev.gamesData.length + 1}`,
+        name: 'NEW COMPETITIVE GAME',
+        shortName: 'Game',
+        pct: 10,
+        color: '#e63926',
+        rank: 'DIAMOND',
+        subRank: 'Division 1',
+        role: 'Fragger',
+        kd: '3.5',
+        winRate: '20%',
+        matches: '100+',
+        hours: '50h',
+        primaryMeta: 'Meta Assault Rifle',
+        dropLocation: 'Hot Drop'
+      };
+      setHasChanges(true);
+      return { ...prev, gamesData: [...prev.gamesData, newGame] };
+    });
+  };
+
+  const removeGame = idx => {
+    if (!window.confirm(`Delete ${profile.gamesData[idx]?.name || 'this game'} from matrix?`)) return;
+    setProfile(prev => {
+      const updated = prev.gamesData.filter((_, i) => i !== idx);
+      setHasChanges(true);
+      return { ...prev, gamesData: updated };
+    });
+  };
+
+  const moveGame = (idx, dir) => {
+    const targetIdx = idx + dir;
+    if (targetIdx < 0 || targetIdx >= profile.gamesData.length) return;
+    setProfile(prev => {
+      const updated = [...prev.gamesData];
+      const temp = updated[idx];
+      updated[idx] = updated[targetIdx];
+      updated[targetIdx] = temp;
+      setHasChanges(true);
+      return { ...prev, gamesData: updated };
+    });
+  };
+
+  /* Loadouts mutations */
+  const updateLoadout = (idx, field, val) => {
+    setProfile(prev => {
+      const updated = [...prev.loadouts];
+      updated[idx] = { ...updated[idx], [field]: val };
+      setHasChanges(true);
+      return { ...prev, loadouts: updated };
+    });
+  };
+
+  const addLoadout = () => {
+    setProfile(prev => {
+      const newLoadout = {
+        game: 'Fortnite Ranked',
+        tier: 'S-TIER META',
+        primary: 'Gatekeeper Shotgun',
+        primarySpecs: 'Drum Mag • Speed Foregrip • Muzzle Brake',
+        secondary: 'Combat Assault Rifle',
+        secondarySpecs: 'Extended Mag • Red Dot Optic',
+        utility: 'Shockwaves & Flowberry Fizz',
+        color: '#e63926'
+      };
+      setHasChanges(true);
+      return { ...prev, loadouts: [...prev.loadouts, newLoadout] };
+    });
+  };
+
+  const removeLoadout = idx => {
+    if (!window.confirm('Delete this weapon loadout build?')) return;
+    setProfile(prev => {
+      const updated = prev.loadouts.filter((_, i) => i !== idx);
+      setHasChanges(true);
+      return { ...prev, loadouts: updated };
+    });
+  };
+
+  /* Schedule mutations */
+  const updateScheduleSlot = (idx, field, val) => {
+    setProfile(prev => {
+      const updated = [...prev.schedule];
+      updated[idx] = { ...updated[idx], [field]: val };
+      setHasChanges(true);
+      return { ...prev, schedule: updated };
+    });
+  };
+
+  const addScheduleSlot = () => {
+    setProfile(prev => {
+      const newSlot = { days: 'WEEKENDS', time: '7:00 PM EST', activity: 'Ranked Arena & Customs' };
+      setHasChanges(true);
+      return { ...prev, schedule: [...prev.schedule, newSlot] };
+    });
+  };
+
+  const removeScheduleSlot = idx => {
+    setProfile(prev => {
+      const updated = prev.schedule.filter((_, i) => i !== idx);
+      setHasChanges(true);
+      return { ...prev, schedule: updated };
+    });
+  };
+
+  /* Save All Changes */
+  const handleSave = async e => {
+    if (e) e.preventDefault();
+    setIsSaving(true);
+    setSaveStatus({ text: 'Saving changes to live site…', type: '' });
 
     try {
-      const data = await postJson('/api/config', {
+      const payload = {
         gamerTag: profile.gamerTag,
-        twitchChannel: profile.twitchChannel,
         title: profile.title,
         tagline: profile.tagline,
         bio: profile.bio,
@@ -219,414 +346,1314 @@ export function Console() {
         discordTag: profile.discordTag,
         rankedPr: profile.rankedPr,
         discordMembers: profile.discordMembers,
-        hardware: {
-          dpi: profile.hwDpi,
-          sens: profile.hwSens,
-          ads: profile.hwAds,
-          monitor: profile.hwMonitor,
-          audio: profile.hwAudio
-        },
-        gamesData: parsedGames,
-        loadouts: parsedLoadouts,
-        showTwitch: Boolean(profile.showTwitch),
-        showYouTube: Boolean(profile.showYouTube),
-        showKick: profile.showKick !== false,
+        primaryGames: profile.primaryGames,
+        gamesData: profile.gamesData,
+        loadouts: profile.loadouts,
+        hardware: profile.hardware,
+        schedule: profile.schedule,
         scheduleNote: profile.scheduleNote,
-        primaryGames: profile.games.split(',').map(g => g.trim()).filter(Boolean),
+        showTwitch: profile.showTwitch,
+        showYouTube: profile.showYouTube,
+        showKick: profile.showKick,
+        twitchChannel: profile.twitchChannel,
         socials: {
-          twitch: profile.twitch.trim(),
-          youtube: profile.youtube.trim(),
-          discord: profile.discord.trim(),
-          twitter: profile.twitter.trim(),
-          kick: profile.kick.trim(),
-          fortniteGg: (profile.fortniteGgUrl || '').trim()
-        },
-        schedule
-      });
-      setProfileMsg('Saved. The public page updates instantly.');
-      setProfileOk(true);
-      if (data.config) {
-        const cfg = data.config;
-        setProfile(p => ({ ...p, gamerTag: cfg.gamerTag || '' }));
-      }
+          kick: (profile.socials.kick || '').trim(),
+          discord: (profile.socials.discord || '').trim(),
+          fortniteGg: (profile.fortniteGgUrl || profile.socials.fortniteGg || '').trim(),
+          twitch: (profile.socials.twitch || '').trim(),
+          youtube: (profile.socials.youtube || '').trim(),
+          twitter: (profile.socials.twitter || '').trim()
+        }
+      };
+
+      const res = await postJson('/api/config', payload);
+      setSaveStatus({ text: 'Saved! Public site updated instantly.', type: 'ok' });
+      setHasChanges(false);
+      setSavedProfile(JSON.parse(JSON.stringify(profile)));
+
+      // Refresh setup status
       const s = await getJson('/api/setup-status', null);
       setSetup(s);
+
+      setTimeout(() => {
+        setSaveStatus({ text: '', type: '' });
+      }, 4000);
     } catch (err) {
-      setProfileMsg(err.message);
-      setProfileOk(false);
+      setSaveStatus({ text: err.message || 'Failed to save configuration', type: 'err' });
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const addClip = async e => {
+  /* Add clip by URL */
+  const handleAddClip = async e => {
     e.preventDefault();
-    setAddMsg('Adding…');
+    setAddMsg('Adding clip to vault…');
     setAddOk(null);
+
     try {
-      const data = await postJson('/api/add', {
+      const res = await postJson('/api/add', {
         url: add.url.trim(),
         title: add.title.trim() || undefined,
         game: add.game.trim() || undefined,
         vibe: add.vibe || undefined,
         featured: add.featured
       });
-      setAddMsg(`Added: ${data.clip.title}`);
+
+      setAddMsg(`Added: "${res.clip.title || 'Clip'}"`);
       setAddOk(true);
-      setAdd({ url: '', title: '', game: '', vibe: '', featured: false });
-      setClips(await getJson('/api/clips', []));
+      setAdd({ url: '', title: '', game: 'Fortnite Ranked', vibe: 'clutch', featured: false });
+
+      // Reload clips
+      const freshClips = await getJson('/api/clips', []);
+      setClips(Array.isArray(freshClips) ? freshClips : []);
+
+      setTimeout(() => setAddMsg(''), 4000);
     } catch (err) {
-      setAddMsg(err.message);
+      setAddMsg(err.message || 'Failed to add clip');
       setAddOk(false);
     }
   };
 
-  const curate = async body => {
+  /* Curate clip (vibe, game, feature) */
+  const handleCurate = async (clipId, updates) => {
     try {
-      await postJson('/api/curate', body);
-      setClips(await getJson('/api/clips', []));
+      await postJson('/api/curate', { clipId, ...updates });
+      const freshClips = await getJson('/api/clips', []);
+      setClips(Array.isArray(freshClips) ? freshClips : []);
     } catch (err) {
-      alert(err.message);
+      alert(`Error updating clip: ${err.message}`);
     }
   };
 
-  const sync = async () => {
-    setActionsMsg('Syncing Twitch + YouTube…');
-    setActionsOk(null);
+  /* Trigger sync */
+  const handleRunSync = async () => {
+    setActionMsg('Syncing external feeds…');
+    setActionOk(null);
     try {
       const data = await postJson('/api/sync', {});
-      setActionsMsg(`Sync done. ${data.count} clips indexed.`);
-      setActionsOk(true);
-      reload().catch(() => {});
+      setActionMsg(`Sync complete! ${data.count} clips indexed.`);
+      setActionOk(true);
+      reloadData();
+      setTimeout(() => setActionMsg(''), 4000);
     } catch (err) {
-      setActionsMsg(err.message);
-      setActionsOk(false);
+      setActionMsg(`Sync error: ${err.message}`);
+      setActionOk(false);
     }
   };
 
-  const discordTest = async () => {
-    setActionsMsg('Sending Discord test…');
-    setActionsOk(null);
+  /* Discord webhook test */
+  const handleDiscordTest = async () => {
+    setActionMsg('Sending test dispatch to Discord webhook…');
+    setActionOk(null);
     try {
       await postJson('/api/discord/test', {});
-      setActionsMsg('Test message sent. Check the Discord channel.');
-      setActionsOk(true);
+      setActionMsg('Test message posted! Check your Discord channel.');
+      setActionOk(true);
+      setTimeout(() => setActionMsg(''), 4000);
     } catch (err) {
-      setActionsMsg(err.message);
-      setActionsOk(false);
+      setActionMsg(`Discord error: ${err.message}`);
+      setActionOk(false);
     }
   };
 
-  const copy = async (text, ev) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      if (ev?.target) ev.target.textContent = 'Copied';
-    } catch { /* clipboard unavailable */ }
-  };
-
-  const set = key => e => setProfile(p => ({ ...p, [key]: e.target.value }));
-
+  /* Loading State */
   if (authed === null) {
     return (
-      <main className="admin"><p className="mono dim">Checking session…</p></main>
+      <main className="admin-page-wrap">
+        <div className="admin-loading-card">
+          <PhoenixLogo size={48} />
+          <p className="mono">Checking admin session…</p>
+        </div>
+      </main>
     );
   }
 
+  /* Login Screen */
   if (!authed) {
     return (
-      <>
-        <a className="skip" href="#main">Skip to content</a>
-        <header className="bar">
-          <a className="brand" href="/">
-            <PhoenixLogo size={32} className="brand-icon" />
-            <span className="brand-text">DARK PHONEIX</span>
-          </a>
-          <nav aria-label="Primary">
-            <a href="/">View site</a>
-            <a href="/admin" aria-current="page">Admin</a>
-          </nav>
-        </header>
-        <main id="main" className="admin">
-          <p className="mono hero-eyebrow">Control room / owner only</p>
-          <h1>Admin console</h1>
-          <p className="lede">Log in to edit the page, paste video links, and finish the Twitch / YouTube / Discord setup. Secrets live in Railway Variables — this console never shows their values.</p>
-          <section className="panel" aria-labelledby="login-h">
-            <h2 id="login-h">Log in</h2>
-            <form onSubmit={login}>
-              <div className="frow">
-                <label className="afield">Username
-                  <input type="text" value={user} onChange={e => setUser(e.target.value)} autoComplete="username" required />
-                </label>
-                <label className="afield">Password
-                  <span className="passwrap">
-                    <input type={showPass ? 'text' : 'password'} value={pass} onChange={e => setPass(e.target.value)} autoComplete="current-password" required />
-                    <button type="button" className="mini" onClick={() => setShowPass(v => !v)} aria-label={showPass ? 'Hide password' : 'Show password'}>
-                      {showPass ? 'Hide' : 'Show'}
-                    </button>
-                  </span>
-                </label>
+      <main className="admin-page-wrap">
+        <div className="admin-login-box">
+          <div className="admin-login-header">
+            <PhoenixLogo size={56} />
+            <h1 className="admin-login-title">DARK PHOENIX</h1>
+            <p className="admin-login-sub mono">COMMAND CENTER &bull; OWNER ACCESS</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="admin-login-form">
+            <div className="admin-field">
+              <label className="mono">Username</label>
+              <input
+                type="text"
+                value={user}
+                onChange={e => setUser(e.target.value)}
+                autoComplete="username"
+                placeholder="Admin username"
+                required
+              />
+            </div>
+
+            <div className="admin-field">
+              <label className="mono">Password</label>
+              <div className="admin-pass-wrap">
+                <input
+                  type={showPass ? 'text' : 'password'}
+                  value={pass}
+                  onChange={e => setPass(e.target.value)}
+                  autoComplete="current-password"
+                  placeholder="Admin password"
+                  required
+                />
+                <button
+                  type="button"
+                  className="admin-btn-show-pass mono"
+                  onClick={() => setShowPass(s => !s)}
+                >
+                  {showPass ? 'HIDE' : 'SHOW'}
+                </button>
               </div>
-              <div className="arow">
-                <button className="btn btn-red" type="submit">Log in</button>
-              </div>
-              <Msg text={loginMsg} ok={loginErr ? false : null} />
-            </form>
-          </section>
-        </main>
-      </>
+            </div>
+
+            <button type="submit" className="admin-btn-primary">
+              ACCESS CONSOLE
+            </button>
+
+            {loginMsg && (
+              <p className={`admin-msg mono ${loginErr ? 'is-err' : ''}`}>
+                {loginMsg}
+              </p>
+            )}
+
+            <div className="admin-login-footer">
+              <a href="/" className="admin-back-link mono">&larr; Return to Public Hub</a>
+            </div>
+          </form>
+        </div>
+      </main>
     );
   }
+
+  if (!profile) return null;
 
   const tw = setup?.twitch || {};
   const yt = setup?.youtube || {};
-  const checklist = setup ? (
-    <ul className="check">
-      {setup.defaultCredentials ? <CheckRow ok={false} label="Set your secret Admin password" hint="Configure ADMIN_USER + ADMIN_PASS in Railway Variables" /> : null}
-      <CheckRow ok={Boolean(setup.profile.gamerTag && setup.profile.tagline && setup.profile.bio)} label="Page profile filled in" hint="Page tab" />
-      <CheckRow ok={Boolean(setup.socials.twitch && setup.socials.youtube && setup.socials.discord && setup.socials.kick)} label="Real Twitch / YouTube / Discord / Kick links" hint="Replace the /ryan placeholders in the Page tab" />
-      <CheckRow ok={Boolean(tw.clientId && tw.clientSecret && tw.broadcasterId)} label="Twitch app keys in Railway Variables" hint="TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, TWITCH_BROADCASTER_ID" />
-      <CheckRow ok={Boolean(tw.refreshToken)} label="Twitch account connected" hint="Hit Connect Twitch, paste TWITCH_REFRESH_TOKEN" />
-      <CheckRow ok={Boolean(yt.clientId && yt.clientSecret && yt.channelId)} label="YouTube app keys in Railway Variables" hint="YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET, YOUTUBE_CHANNEL_ID" />
-      <CheckRow ok={Boolean(yt.refreshToken)} label="YouTube account connected" hint="Hit Connect YouTube, paste YOUTUBE_REFRESH_TOKEN" />
-      <CheckRow ok={Boolean(setup.discord.webhook)} label="Discord live alerts wired" hint="DISCORD_WEBHOOK_URL in Railway Variables" />
-      <CheckRow ok={setup.content.placeholders === 0} label="Placeholders replaced with real clips" hint={`${setup.content.clips} clips, ${setup.content.placeholders} placeholders left`} />
-    </ul>
-  ) : <p className="mono dim">Loading…</p>;
+
+  const filteredClips = clips.filter(c => {
+    if (!clipFilter) return true;
+    const q = clipFilter.toLowerCase();
+    return (c.title || '').toLowerCase().includes(q) ||
+           (c.game || '').toLowerCase().includes(q) ||
+           (c.platform || '').toLowerCase().includes(q);
+  });
 
   return (
-    <>
-      <a className="skip" href="#main">Skip to content</a>
-      <header className="bar">
-        <a className="brand" href="/">
-          <PhoenixLogo size={32} className="brand-icon" />
-          <span className="brand-text">DARK PHONEIX</span>
-        </a>
-        <nav aria-label="Primary">
-          <a href="/">View site</a>
-          <a href="/admin" aria-current="page">Admin</a>
-        </nav>
-      </header>
-      <main id="main" className="admin">
-        <p className="mono hero-eyebrow">Control room / owner only</p>
-        <h1>Admin console</h1>
-        <p className="lede">Edit the page, paste video links, and finish the Twitch / YouTube / Discord setup. Secrets live in Railway Variables — this console never shows their values.</p>
-
-        <div className="tabs" role="tablist" aria-label="Admin sections">
-          {TABS.map(([id, label]) => (
-            <button key={id} type="button" role="tab" aria-selected={tab === id} className={`tab${tab === id ? ' active' : ''}`} onClick={() => setTab(id)}>
-              {label}
-            </button>
-          ))}
-          <button type="button" className="tab" onClick={logout}>Log out</button>
+    <div className="admin-app">
+      {/* Top Header Bar */}
+      <header className="admin-topbar">
+        <div className="admin-topbar-left">
+          <PhoenixLogo size={36} />
+          <div className="admin-brand-info">
+            <span className="admin-brand-name">DARK PHOENIX</span>
+            <span className="admin-brand-tag mono">CONTROL ROOM</span>
+          </div>
         </div>
 
-        {tab === 'setup' ? (
-          <section className="panel" aria-labelledby="check-h">
-            <h2 id="check-h"><span className="step">01</span>Setup checklist</h2>
-            {checklist}
-            <p className="hint">Everything is guided in the Connections tab — no docs needed. Refresh this page after changing Railway Variables.</p>
-            <div className="arow">
-              <button className="mini" type="button" onClick={sync}>Run sync now</button>
-              <button className="mini" type="button" onClick={discordTest}>Send Discord test</button>
+        <div className="admin-topbar-right">
+          <a href="/" target="_blank" rel="noopener noreferrer" className="admin-btn-ghost mono" title="Open live public portal in new tab">
+            <span>VIEW LIVE SITE</span>
+            <ExternalLinkIcon size={13} />
+          </a>
+          <button type="button" className="admin-btn-ghost is-danger mono" onClick={handleLogout}>
+            LOG OUT
+          </button>
+        </div>
+      </header>
+
+      {/* Main Admin Workspace */}
+      <main className="admin-workspace">
+        {/* Navigation Tabs */}
+        <nav className="admin-nav-tabs" role="tablist">
+          {ADMIN_TABS.map(t => (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === t.id}
+              className={`admin-tab-btn ${activeTab === t.id ? 'is-active' : ''}`}
+              onClick={() => setActiveTab(t.id)}
+            >
+              <span className="admin-tab-icon">{t.icon}</span>
+              <span className="admin-tab-label">{t.label}</span>
+              {t.id === 'clips' && clips.length > 0 && (
+                <span className="admin-tab-pill mono">{clips.length}</span>
+              )}
+            </button>
+          ))}
+        </nav>
+
+        {/* Status Toast */}
+        <StatusToast message={saveStatus.text} type={saveStatus.type} />
+        {actionMsg && (
+          <div className={`admin-action-banner mono ${actionOk ? 'is-ok' : 'is-err'}`}>
+            {actionMsg}
+          </div>
+        )}
+
+        {/* TAB 1: PROFILE & BRAND */}
+        {activeTab === 'profile' && (
+          <div className="admin-tab-content">
+            <div className="admin-section-header">
+              <h2>Streamer Identity & Brand Setup</h2>
+              <p className="admin-section-desc">Manage public tags, bio description, primary Epic Games credentials, and live stats.</p>
             </div>
-            <Msg text={actionsMsg} ok={actionsOk} />
-          </section>
-        ) : null}
 
-        {tab === 'page' && profile ? (
-          <section className="panel" aria-labelledby="prof-h">
-            <h2 id="prof-h"><span className="step">02</span>Page profile + social links</h2>
-            <form onSubmit={saveProfile}>
-              <div className="frow">
-                <label className="afield">Gamer tag <input type="text" maxLength={120} value={profile.gamerTag} onChange={set('gamerTag')} /></label>
-                <label className="afield">Rig / Platform <input type="text" maxLength={60} placeholder="PC" value={profile.device} onChange={set('device')} /></label>
-              </div>
-              <div className="frow">
-                <label className="afield">Epic Games gamer tag <input type="text" maxLength={60} placeholder="DarkPhoneix_LDG" value={profile.epicTag} onChange={set('epicTag')} /></label>
-                <label className="afield">Fortnite.gg profile URL <input type="url" placeholder="https://fortnite.gg/sprites?id=3847681" value={profile.fortniteGgUrl} onChange={set('fortniteGgUrl')} /></label>
-              </div>
-              <div className="frow">
-                <label className="afield">Discord username / tag <input type="text" maxLength={60} placeholder="darkphoenix" value={profile.discordTag} onChange={set('discordTag')} /></label>
-                <label className="afield">Twitch channel (no @) <input type="text" maxLength={120} value={profile.twitchChannel} onChange={set('twitchChannel')} /></label>
-              </div>
-              <div className="frow single">
-                <label className="afield">Page title <input type="text" maxLength={120} value={profile.title} onChange={set('title')} /></label>
-              </div>
-              <div className="frow single">
-                <label className="afield">Tagline <input type="text" maxLength={120} value={profile.tagline} onChange={set('tagline')} /></label>
-              </div>
-              <div className="frow single">
-                <label className="afield">Bio <textarea maxLength={2000} value={profile.bio} onChange={set('bio')} /></label>
-              </div>
-              <div className="frow single">
-                <label className="afield">Main games (comma separated) <input type="text" placeholder="Fortnite, VALORANT" value={profile.games} onChange={set('games')} /></label>
-              </div>
-              <div className="frow single">
-                <label className="afield">Kick URL <input type="url" placeholder="https://kick.com/..." value={profile.kick} onChange={set('kick')} /></label>
-              </div>
-              <div className="frow">
-                <label className="afield">Discord invite <input type="url" placeholder="https://discord.gg/..." value={profile.discord} onChange={set('discord')} /></label>
-                <label className="afield">X / Twitter URL <input type="url" placeholder="https://x.com/..." value={profile.twitter} onChange={set('twitter')} /></label>
-              </div>
-              <div className="frow">
-                <label className="afield">Twitch URL <input type="url" placeholder="https://twitch.tv/..." value={profile.twitch} onChange={set('twitch')} /></label>
-                <label className="afield">YouTube URL <input type="url" placeholder="https://youtube.com/@..." value={profile.youtube} onChange={set('youtube')} /></label>
-              </div>
-              <div className="frow">
-                <label className="afield" style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={profile.showTwitch}
-                    onChange={e => setProfile(p => ({ ...p, showTwitch: e.target.checked }))}
-                    style={{ width: 18, height: 18, cursor: 'pointer' }}
-                  />
-                  <span>Show Twitch on public page (hidden for now)</span>
-                </label>
-                <label className="afield" style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={profile.showYouTube}
-                    onChange={e => setProfile(p => ({ ...p, showYouTube: e.target.checked }))}
-                    style={{ width: 18, height: 18, cursor: 'pointer' }}
-                  />
-                  <span>Show YouTube on public page (hidden for now)</span>
-                </label>
-              </div>
-              <div className="frow">
-                <label className="afield">Ranked PR badge <input type="text" maxLength={60} placeholder="#1,420" value={profile.rankedPr} onChange={set('rankedPr')} /></label>
-                <label className="afield">Discord squad members count <input type="text" maxLength={60} placeholder="4,280 Squad Members" value={profile.discordMembers} onChange={set('discordMembers')} /></label>
-              </div>
-              <h3 style={{ margin: '16px 0 8px 0', fontSize: '0.95rem', letterSpacing: '0.05em', color: '#ff453a' }}>HARDWARE & SENSITIVITY SPECS</h3>
-              <div className="frow">
-                <label className="afield">Mouse DPI <input type="text" maxLength={40} placeholder="800" value={profile.hwDpi} onChange={set('hwDpi')} /></label>
-                <label className="afield">In-Game Sensitivity <input type="text" maxLength={60} placeholder="6.5% X / 6.5% Y" value={profile.hwSens} onChange={set('hwSens')} /></label>
-              </div>
-              <div className="frow">
-                <label className="afield">ADS Sensitivity <input type="text" maxLength={60} placeholder="1.0 NATIVE" value={profile.hwAds} onChange={set('hwAds')} /></label>
-                <label className="afield">Monitor / Refresh Rate <input type="text" maxLength={60} placeholder="240HZ FAST IPS" value={profile.hwMonitor} onChange={set('hwMonitor')} /></label>
-              </div>
-              <div className="frow single">
-                <label className="afield">Audio Setup & EQ <input type="text" maxLength={80} placeholder="STUDIO IEMs + FOOTSTEP EQ" value={profile.hwAudio} onChange={set('hwAudio')} /></label>
-              </div>
-              <h3 style={{ margin: '16px 0 8px 0', fontSize: '0.95rem', letterSpacing: '0.05em', color: '#ff453a' }}>WEAPON LOADOUTS & META BUILDS (JSON)</h3>
-              <div className="frow single">
-                <label className="afield">Loadouts data array (edit weapons, attachments, tiers, colors)
-                  <textarea rows={8} style={{ fontFamily: 'monospace', fontSize: '12px' }} value={profile.loadoutsJson} onChange={set('loadoutsJson')} />
-                </label>
-              </div>
-              <h3 style={{ margin: '16px 0 8px 0', fontSize: '0.95rem', letterSpacing: '0.05em', color: '#ff453a' }}>COMPETITIVE GAMES MATRIX & STATS (JSON)</h3>
-              <div className="frow single">
-                <label className="afield">Games data array (edit ranks, K/D, win rate, hours, drop locations)
-                  <textarea rows={10} style={{ fontFamily: 'monospace', fontSize: '12px' }} value={profile.gamesDataJson} onChange={set('gamesDataJson')} />
-                </label>
-              </div>
-              <div className="frow single">
-                <label className="afield">Schedule status note (shown when no fixed schedule)
-                  <textarea placeholder="No fixed schedule right now — stream alerts & community drops are announced live in Discord." value={profile.scheduleNote} onChange={set('scheduleNote')} />
-                </label>
-              </div>
-              <div className="frow single">
-                <label className="afield">Schedule table (optional, one per line: days | time | activity)
-                  <textarea placeholder="Mon - Thu | 7:00 PM - 11:30 PM EST | Ranked grind" value={profile.schedule} onChange={set('schedule')} />
-                </label>
-              </div>
-              <div className="arow">
-                <button className="btn btn-red" type="submit">Save page</button>
-              </div>
-              <Msg text={profileMsg} ok={profileOk} />
-            </form>
-          </section>
-        ) : null}
+            <div className="admin-card-grid">
+              {/* Creator Identity */}
+              <div className="admin-panel-card">
+                <div className="admin-panel-card-head">
+                  <h3>Creator Info</h3>
+                  <span className="admin-card-tag mono">PUBLIC HERO</span>
+                </div>
 
-        {tab === 'connections' && setup ? (
-          <section className="panel" aria-labelledby="conn-h">
-            <h2 id="conn-h"><span className="step">03</span>Connections: Twitch / YouTube / Discord</h2>
-            <ul className="check">
-              <CheckRow ok={tw.clientId} label="TWITCH_CLIENT_ID" />
-              <CheckRow ok={tw.clientSecret} label="TWITCH_CLIENT_SECRET" />
-              <CheckRow ok={tw.broadcasterId} label="TWITCH_BROADCASTER_ID (numeric user id)" />
-              <CheckRow ok={tw.refreshToken} label="TWITCH_REFRESH_TOKEN (from Connect Twitch)" />
-              <CheckRow ok={tw.eventsubSecret} label="TWITCH_EVENTSUB_SECRET (any random string)" />
-              <CheckRow ok={yt.clientId} label="YOUTUBE_CLIENT_ID" />
-              <CheckRow ok={yt.clientSecret} label="YOUTUBE_CLIENT_SECRET" />
-              <CheckRow ok={yt.channelId} label="YOUTUBE_CHANNEL_ID (UC...)" />
-              <CheckRow ok={yt.refreshToken} label="YOUTUBE_REFRESH_TOKEN (from Connect YouTube)" />
-              <CheckRow ok={setup.discord.webhook} label="DISCORD_WEBHOOK_URL (channel webhook)" />
-            </ul>
-            <p className="hint">Step 1 — create the apps and paste IDs + secrets into Railway Variables (service → Variables tab). Step 2 — come back here and hit Connect so Ryan&apos;s own accounts authorize the site.</p>
-            <div className="arow">
-              <a className="btn" href="/auth/twitch">Connect Twitch</a>
-              <a className="btn" href="/auth/youtube">Connect YouTube</a>
+                <div className="admin-form-group">
+                  <label className="mono">Gamer Tag / Display Name</label>
+                  <input
+                    type="text"
+                    value={profile.gamerTag}
+                    onChange={e => updateField('gamerTag', e.target.value)}
+                    placeholder="Dark Phoenix"
+                  />
+                </div>
+
+                <div className="admin-form-group">
+                  <label className="mono">Primary Rig / Hardware Tag</label>
+                  <input
+                    type="text"
+                    value={profile.device}
+                    onChange={e => updateField('device', e.target.value)}
+                    placeholder="PC (Mouse & Keyboard • 240Hz)"
+                  />
+                </div>
+
+                <div className="admin-form-group">
+                  <label className="mono">Page Title (Browser Tab)</label>
+                  <input
+                    type="text"
+                    value={profile.title}
+                    onChange={e => updateField('title', e.target.value)}
+                  />
+                </div>
+
+                <div className="admin-form-group">
+                  <label className="mono">Hero Subtitle / Tagline</label>
+                  <input
+                    type="text"
+                    value={profile.tagline}
+                    onChange={e => updateField('tagline', e.target.value)}
+                  />
+                </div>
+
+                <div className="admin-form-group">
+                  <label className="mono">Creator Bio (Public Description)</label>
+                  <textarea
+                    rows={4}
+                    value={profile.bio}
+                    onChange={e => updateField('bio', e.target.value)}
+                    placeholder="Short bio explaining stream content, ranked grind, and community..."
+                  />
+                </div>
+              </div>
+
+              {/* Competitive Accounts & Links */}
+              <div className="admin-panel-card">
+                <div className="admin-panel-card-head">
+                  <h3>Competitive Profile & PR</h3>
+                  <span className="admin-card-tag mono">FORTNITE.GG</span>
+                </div>
+
+                <div className="admin-form-group">
+                  <label className="mono">Epic Games Username</label>
+                  <input
+                    type="text"
+                    value={profile.epicTag}
+                    onChange={e => updateField('epicTag', e.target.value)}
+                    placeholder="DARKPHOENIX_LOG"
+                  />
+                  <small className="admin-hint">Visitors can 1-tap copy this from the hero section.</small>
+                </div>
+
+                <div className="admin-form-group">
+                  <label className="mono">Fortnite.gg Profile URL</label>
+                  <div className="admin-input-action-row">
+                    <input
+                      type="url"
+                      value={profile.fortniteGgUrl}
+                      onChange={e => updateField('fortniteGgUrl', e.target.value)}
+                      placeholder="https://fortnite.gg/sprites?id=3847681"
+                    />
+                    {profile.fortniteGgUrl && (
+                      <a href={profile.fortniteGgUrl} target="_blank" rel="noopener noreferrer" className="admin-btn-action mono">
+                        TEST LINK
+                      </a>
+                    )}
+                  </div>
+                  <small className="admin-hint">Used for the desktop header &ldquo;STATS&rdquo; button and hero link.</small>
+                </div>
+
+                <div className="admin-form-group">
+                  <label className="mono">Ranked PR Badge (Hero stat)</label>
+                  <input
+                    type="text"
+                    value={profile.rankedPr}
+                    onChange={e => updateField('rankedPr', e.target.value)}
+                    placeholder="#1,420 Global PR"
+                  />
+                </div>
+
+                <div className="admin-form-group">
+                  <label className="mono">Discord Squad Members (Count badge)</label>
+                  <input
+                    type="text"
+                    value={profile.discordMembers}
+                    onChange={e => updateField('discordMembers', e.target.value)}
+                    placeholder="4,280 Squad Members"
+                  />
+                </div>
+              </div>
             </div>
-            <p className="hint">After Connect, copy the refresh token shown on screen into Railway Variables (<code>TWITCH_REFRESH_TOKEN</code> / <code>YOUTUBE_REFRESH_TOKEN</code>) and redeploy.</p>
-            <p className="hint">Webhook receivers (auto-subscribed on sync when keys exist):</p>
-            {[['YouTube', setup.webhooks.youtube], ['Twitch', setup.webhooks.twitch]].map(([label, url]) => (
-              <div className="kv" key={label}>
-                <span>{label}: {url}</span>
-                <button className="mini" type="button" onClick={e => copy(url, e)}>Copy</button>
-              </div>
-            ))}
-            <Guide baseUrl={setup.baseUrl} />
-          </section>
-        ) : null}
+          </div>
+        )}
 
-        {tab === 'clips' ? (
-          <>
-            <section className="panel" aria-labelledby="add-h">
-              <h2 id="add-h"><span className="step">04</span>Add a video by link</h2>
-              <p className="hint">Works before any API keys exist. Paste a Twitch clip or YouTube link — first real clip removes the placeholders.</p>
-              <form onSubmit={addClip}>
-                <div className="frow single">
-                  <label className="afield">Video URL <input type="url" required placeholder="https://clips.twitch.tv/... or https://www.youtube.com/watch?v=..." value={add.url} onChange={e => setAdd(a => ({ ...a, url: e.target.value }))} /></label>
-                </div>
-                <div className="frow">
-                  <label className="afield">Title (optional backup) <input type="text" value={add.title} onChange={e => setAdd(a => ({ ...a, title: e.target.value }))} /></label>
-                  <label className="afield">Game <input type="text" placeholder="Fortnite" value={add.game} onChange={e => setAdd(a => ({ ...a, game: e.target.value }))} /></label>
-                </div>
-                <div className="frow">
-                  <label className="afield">Vibe
-                    <select value={add.vibe} onChange={e => setAdd(a => ({ ...a, vibe: e.target.value }))}>
-                      <option value="">Auto</option>
-                      <option value="clutch">Clutch</option>
-                      <option value="ace">Ace</option>
-                      <option value="funny">Funny</option>
-                      <option value="epic">Epic</option>
+        {/* TAB 2: CLIPS VAULT */}
+        {activeTab === 'clips' && (
+          <div className="admin-tab-content">
+            {/* Quick Add Video Panel */}
+            <div className="admin-panel-card admin-add-clip-card">
+              <div className="admin-panel-card-head">
+                <h3>Quick Add Video to Vault</h3>
+                <span className="admin-card-tag mono">INSTANT INGEST</span>
+              </div>
+              <p className="admin-card-desc">
+                Paste any Kick clip, Twitch clip, or YouTube URL. The first real clip automatically replaces seeded placeholders.
+              </p>
+
+              <form onSubmit={handleAddClip} className="admin-add-clip-form">
+                <div className="admin-field-row">
+                  <div className="admin-form-group flex-2">
+                    <label className="mono">Clip or Video URL *</label>
+                    <input
+                      type="url"
+                      required
+                      placeholder="https://kick.com/... or https://clips.twitch.tv/... or https://youtube.com/watch?v=..."
+                      value={add.url}
+                      onChange={e => setAdd(a => ({ ...a, url: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="admin-form-group flex-1">
+                    <label className="mono">Game</label>
+                    <input
+                      type="text"
+                      placeholder="Fortnite Ranked"
+                      value={add.game}
+                      onChange={e => setAdd(a => ({ ...a, game: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="admin-form-group flex-1">
+                    <label className="mono">Vibe Tag</label>
+                    <select
+                      value={add.vibe}
+                      onChange={e => setAdd(a => ({ ...a, vibe: e.target.value }))}
+                    >
+                      {VIBES.map(v => (
+                        <option key={v} value={v}>{v.toUpperCase()}</option>
+                      ))}
                     </select>
-                  </label>
-                  <label className="afield">Featured?
-                    <select value={add.featured ? '1' : ''} onChange={e => setAdd(a => ({ ...a, featured: e.target.value === '1' }))}>
-                      <option value="">No</option>
-                      <option value="1">Yes — hero player</option>
-                    </select>
-                  </label>
+                  </div>
                 </div>
-                <div className="arow">
-                  <button className="btn btn-red" type="submit">Add video</button>
+
+                <div className="admin-field-row align-center">
+                  <div className="admin-form-group flex-2">
+                    <label className="mono">Custom Title (Optional override)</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Solo Squad Wipe in Unreal Lobby"
+                      value={add.title}
+                      onChange={e => setAdd(a => ({ ...a, title: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="admin-form-group flex-1 checkbox-group">
+                    <label className="admin-checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={add.featured}
+                        onChange={e => setAdd(a => ({ ...a, featured: e.target.checked }))}
+                      />
+                      <span>Make Hero Spotlight</span>
+                    </label>
+                  </div>
+
+                  <div className="flex-1 button-group">
+                    <button type="submit" className="admin-btn-primary full-width">
+                      ADD TO VAULT
+                    </button>
+                  </div>
                 </div>
-                <Msg text={addMsg} ok={addOk} />
+
+                {addMsg && (
+                  <p className={`admin-msg mono ${addOk ? 'is-ok' : 'is-err'}`}>
+                    {addMsg}
+                  </p>
+                )}
               </form>
-            </section>
+            </div>
 
-            <section className="panel" aria-labelledby="clips-h">
-              <h2 id="clips-h"><span className="step">05</span>Clip shelf</h2>
-              <p className="hint">Retag vibes, fix game names, or pick the featured hero clip. Changes save instantly.</p>
-              <ul className="cliplist">
-                {clips.map(c => (
-                  <li key={c.id}>
-                    <span className="t">{c.title}{c.featured ? ' ★' : ''}{c.placeholder ? ' (placeholder)' : ''}</span>
-                    <span className="ops">
-                      <select value={(c.vibe || '').toLowerCase()} onChange={e => curate({ clipId: c.id, vibe: e.target.value })} aria-label={`Vibe for ${c.title}`}>
-                        {VIBES.map(v => <option key={v} value={v}>{v}</option>)}
-                      </select>
-                      <input defaultValue={c.game || ''} key={`${c.id}-${c.game}`} onBlur={e => { if (e.target.value !== (c.game || '')) curate({ clipId: c.id, game: e.target.value }); }} aria-label={`Game for ${c.title}`} />
-                      <button className="mini" type="button" onClick={() => curate({ clipId: c.id, featured: true })}>Feature</button>
-                    </span>
-                    <span className="m">{c.platform} / {c.game || ''} / {c.published_at || ''}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          </>
-        ) : null}
+            {/* Clips Shelf & Management */}
+            <div className="admin-shelf-header">
+              <div>
+                <h3>Clip Shelf ({clips.length} Total)</h3>
+                <p className="admin-section-desc">Manage game tags, vibes, and pick the featured hero spotlight clip.</p>
+              </div>
+
+              <div className="admin-shelf-search">
+                <input
+                  type="text"
+                  placeholder="Search clips by title, game, or platform..."
+                  value={clipFilter}
+                  onChange={e => setClipFilter(e.target.value)}
+                  className="admin-search-input"
+                />
+              </div>
+            </div>
+
+            <div className="admin-clips-grid">
+              {filteredClips.map(c => {
+                const isFeatured = c.featured === true;
+                const platform = (c.platform || 'kick').toUpperCase();
+                return (
+                  <div key={c.id} className={`admin-clip-card ${isFeatured ? 'is-featured' : ''}`}>
+                    <div className="admin-clip-thumb-box">
+                      {c.thumbnail_url ? (
+                        <img src={c.thumbnail_url} alt={c.title} className="admin-clip-thumb" />
+                      ) : (
+                        <div className="admin-clip-thumb-fallback mono">
+                          <PlayIcon size={24} />
+                          <span>{platform}</span>
+                        </div>
+                      )}
+                      <span className={`admin-clip-platform-badge platform-${platform.toLowerCase()} mono`}>
+                        {platform}
+                      </span>
+                      {isFeatured && (
+                        <span className="admin-clip-hero-badge mono">
+                          ★ ACTIVE HERO
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="admin-clip-body">
+                      <h4 className="admin-clip-title" title={c.title}>
+                        {c.title || 'Untitled Highlight'}
+                      </h4>
+
+                      <div className="admin-clip-meta mono">
+                        <span>{c.game || 'Ranked'}</span>
+                        <span>&bull;</span>
+                        <span>{fmtDate(c.published_at || '')}</span>
+                        {c.views ? <span>&bull; {fmtViews(c.views)} views</span> : null}
+                      </div>
+
+                      <div className="admin-clip-controls">
+                        <div className="admin-control-col">
+                          <label className="mono">VIBE</label>
+                          <select
+                            value={(c.vibe || 'clutch').toLowerCase()}
+                            onChange={e => handleCurate(c.id, { vibe: e.target.value })}
+                          >
+                            {VIBES.map(v => (
+                              <option key={v} value={v}>{v.toUpperCase()}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="admin-control-col">
+                          <label className="mono">GAME</label>
+                          <input
+                            type="text"
+                            defaultValue={c.game || ''}
+                            onBlur={e => {
+                              if (e.target.value !== (c.game || '')) {
+                                handleCurate(c.id, { game: e.target.value });
+                              }
+                            }}
+                          />
+                        </div>
+
+                        <div className="admin-control-col auto">
+                          <label className="mono">&nbsp;</label>
+                          <button
+                            type="button"
+                            className={`admin-btn-feature mono ${isFeatured ? 'active' : ''}`}
+                            onClick={() => handleCurate(c.id, { featured: true })}
+                            disabled={isFeatured}
+                          >
+                            {isFeatured ? '★ HERO' : 'SET HERO'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: GAMES MATRIX */}
+        {activeTab === 'games' && (
+          <div className="admin-tab-content">
+            <div className="admin-section-header with-actions">
+              <div>
+                <h2>Competitive Games Matrix</h2>
+                <p className="admin-section-desc">
+                  Edit the live game cards, ranks, win rates, K/D ratios, and playtime distribution percentages without touching JSON!
+                </p>
+              </div>
+
+              <div className="admin-header-actions-row">
+                <button
+                  type="button"
+                  className="admin-btn-secondary mono"
+                  onClick={() => setShowGamesJson(s => !s)}
+                >
+                  {showGamesJson ? 'HIDE RAW JSON' : 'RAW JSON VIEW'}
+                </button>
+                <button type="button" className="admin-btn-primary mono" onClick={addGame}>
+                  ＋ ADD NEW GAME
+                </button>
+              </div>
+            </div>
+
+            {/* Optional Raw JSON view */}
+            {showGamesJson && (
+              <div className="admin-json-box">
+                <p className="mono admin-json-hint">Direct JSON representation of Games Matrix:</p>
+                <textarea
+                  rows={10}
+                  className="mono admin-raw-textarea"
+                  value={JSON.stringify(profile.gamesData, null, 2)}
+                  onChange={e => {
+                    try {
+                      const parsed = JSON.parse(e.target.value);
+                      if (Array.isArray(parsed)) {
+                        setProfile(p => ({ ...p, gamesData: parsed }));
+                        setHasChanges(true);
+                      }
+                    } catch {
+                      /* allow typing */
+                    }
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Interactive Visual Cards */}
+            <div className="admin-game-cards-stack">
+              {profile.gamesData.map((g, idx) => (
+                <div key={g.id || idx} className="admin-game-editor-card" style={{ borderLeftColor: g.color || '#e63926' }}>
+                  <div className="admin-game-card-top">
+                    <div className="admin-game-card-title-group">
+                      <span className="admin-game-num mono">#{idx + 1}</span>
+                      <input
+                        type="text"
+                        className="admin-game-name-input"
+                        value={g.name || ''}
+                        onChange={e => updateGame(idx, 'name', e.target.value)}
+                        placeholder="GAME TITLE"
+                      />
+                      <input
+                        type="text"
+                        className="admin-game-short-input mono"
+                        value={g.shortName || ''}
+                        onChange={e => updateGame(idx, 'shortName', e.target.value)}
+                        placeholder="Short Tag"
+                      />
+                    </div>
+
+                    <div className="admin-game-card-actions">
+                      <button
+                        type="button"
+                        className="admin-icon-btn"
+                        onClick={() => moveGame(idx, -1)}
+                        disabled={idx === 0}
+                        title="Move Up"
+                      >
+                        ▲
+                      </button>
+                      <button
+                        type="button"
+                        className="admin-icon-btn"
+                        onClick={() => moveGame(idx, 1)}
+                        disabled={idx === profile.gamesData.length - 1}
+                        title="Move Down"
+                      >
+                        ▼
+                      </button>
+                      <button
+                        type="button"
+                        className="admin-icon-btn is-danger"
+                        onClick={() => removeGame(idx)}
+                        title="Remove Game"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="admin-game-fields-grid">
+                    <div className="admin-field-compact">
+                      <label className="mono">RANK BADGE</label>
+                      <input
+                        type="text"
+                        value={g.rank || ''}
+                        onChange={e => updateGame(idx, 'rank', e.target.value)}
+                        placeholder="UNREAL"
+                      />
+                    </div>
+
+                    <div className="admin-field-compact">
+                      <label className="mono">SUB-RANK / PR</label>
+                      <input
+                        type="text"
+                        value={g.subRank || ''}
+                        onChange={e => updateGame(idx, 'subRank', e.target.value)}
+                        placeholder="#1,420 Global PR"
+                      />
+                    </div>
+
+                    <div className="admin-field-compact">
+                      <label className="mono">FOCUS / PLAYTIME %</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={g.pct || 0}
+                        onChange={e => updateGame(idx, 'pct', Number(e.target.value))}
+                      />
+                    </div>
+
+                    <div className="admin-field-compact">
+                      <label className="mono">ACCENT COLOR</label>
+                      <div className="admin-color-picker-row">
+                        <input
+                          type="color"
+                          value={g.color || '#e63926'}
+                          onChange={e => updateGame(idx, 'color', e.target.value)}
+                          className="admin-color-input"
+                        />
+                        <span className="mono admin-color-hex">{g.color || '#e63926'}</span>
+                      </div>
+                    </div>
+
+                    <div className="admin-field-compact">
+                      <label className="mono">IN-GAME ROLE</label>
+                      <input
+                        type="text"
+                        value={g.role || ''}
+                        onChange={e => updateGame(idx, 'role', e.target.value)}
+                        placeholder="Fragger & Endgame IGL"
+                      />
+                    </div>
+
+                    <div className="admin-field-compact">
+                      <label className="mono">K/D RATIO</label>
+                      <input
+                        type="text"
+                        value={g.kd || ''}
+                        onChange={e => updateGame(idx, 'kd', e.target.value)}
+                        placeholder="4.9"
+                      />
+                    </div>
+
+                    <div className="admin-field-compact">
+                      <label className="mono">WIN RATE %</label>
+                      <input
+                        type="text"
+                        value={g.winRate || ''}
+                        onChange={e => updateGame(idx, 'winRate', e.target.value)}
+                        placeholder="28%"
+                      />
+                    </div>
+
+                    <div className="admin-field-compact">
+                      <label className="mono">MATCHES & HOURS</label>
+                      <div className="admin-dual-input">
+                        <input
+                          type="text"
+                          value={g.matches || ''}
+                          onChange={e => updateGame(idx, 'matches', e.target.value)}
+                          placeholder="1,240+"
+                        />
+                        <input
+                          type="text"
+                          value={g.hours || ''}
+                          onChange={e => updateGame(idx, 'hours', e.target.value)}
+                          placeholder="620h"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="admin-field-compact span-2">
+                      <label className="mono">PRIMARY META WEAPONS</label>
+                      <input
+                        type="text"
+                        value={g.primaryMeta || ''}
+                        onChange={e => updateGame(idx, 'primaryMeta', e.target.value)}
+                        placeholder="Gatekeeper Shotgun • Combat AR"
+                      />
+                    </div>
+
+                    <div className="admin-field-compact span-2">
+                      <label className="mono">FAVORITE DROP LOCATION</label>
+                      <input
+                        type="text"
+                        value={g.dropLocation || ''}
+                        onChange={e => updateGame(idx, 'dropLocation', e.target.value)}
+                        placeholder="The Underworld / Rebirth Prison"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: WEAPON LOADOUTS */}
+        {activeTab === 'loadouts' && (
+          <div className="admin-tab-content">
+            <div className="admin-section-header with-actions">
+              <div>
+                <h2>Weapon Loadouts & Meta Builds</h2>
+                <p className="admin-section-desc">Configure pro weapon attachments, tier ratings, and combat loadout specs with simple cards.</p>
+              </div>
+
+              <div className="admin-header-actions-row">
+                <button
+                  type="button"
+                  className="admin-btn-secondary mono"
+                  onClick={() => setShowLoadoutsJson(s => !s)}
+                >
+                  {showLoadoutsJson ? 'HIDE RAW JSON' : 'RAW JSON VIEW'}
+                </button>
+                <button type="button" className="admin-btn-primary mono" onClick={addLoadout}>
+                  ＋ ADD NEW LOADOUT
+                </button>
+              </div>
+            </div>
+
+            {/* Optional Raw JSON view */}
+            {showLoadoutsJson && (
+              <div className="admin-json-box">
+                <p className="mono admin-json-hint">Direct JSON representation of Loadouts:</p>
+                <textarea
+                  rows={10}
+                  className="mono admin-raw-textarea"
+                  value={JSON.stringify(profile.loadouts, null, 2)}
+                  onChange={e => {
+                    try {
+                      const parsed = JSON.parse(e.target.value);
+                      if (Array.isArray(parsed)) {
+                        setProfile(p => ({ ...p, loadouts: parsed }));
+                        setHasChanges(true);
+                      }
+                    } catch {
+                      /* allow typing */
+                    }
+                  }}
+                />
+              </div>
+            )}
+
+            <div className="admin-loadouts-stack">
+              {profile.loadouts.map((l, idx) => (
+                <div key={idx} className="admin-loadout-editor-card" style={{ borderLeftColor: l.color || '#ff453a' }}>
+                  <div className="admin-loadout-card-top">
+                    <div className="admin-loadout-head-left">
+                      <span className="admin-loadout-tag mono">BUILD #{idx + 1}</span>
+                      <input
+                        type="text"
+                        className="admin-loadout-game-input"
+                        value={l.game || ''}
+                        onChange={e => updateLoadout(idx, 'game', e.target.value)}
+                        placeholder="Game (e.g. Call of Duty: Warzone)"
+                      />
+                      <input
+                        type="text"
+                        className="admin-loadout-tier-input mono"
+                        value={l.tier || ''}
+                        onChange={e => updateLoadout(idx, 'tier', e.target.value)}
+                        placeholder="S-TIER META"
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      className="admin-icon-btn is-danger"
+                      onClick={() => removeLoadout(idx)}
+                      title="Remove Loadout"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div className="admin-loadout-grid">
+                    <div className="admin-loadout-col">
+                      <label className="mono">PRIMARY WEAPON</label>
+                      <input
+                        type="text"
+                        value={l.primary || ''}
+                        onChange={e => updateLoadout(idx, 'primary', e.target.value)}
+                        placeholder="Striker 9 SMG"
+                      />
+                      <label className="mono mt-2">ATTACHMENTS / TUNING</label>
+                      <textarea
+                        rows={2}
+                        value={l.primarySpecs || ''}
+                        onChange={e => updateLoadout(idx, 'primarySpecs', e.target.value)}
+                        placeholder="Sonic Suppressor • Striker Recon Barrel • 50 Rnd Drum..."
+                      />
+                    </div>
+
+                    <div className="admin-loadout-col">
+                      <label className="mono">SECONDARY WEAPON</label>
+                      <input
+                        type="text"
+                        value={l.secondary || ''}
+                        onChange={e => updateLoadout(idx, 'secondary', e.target.value)}
+                        placeholder="Combat Assault Rifle"
+                      />
+                      <label className="mono mt-2">ATTACHMENTS / TUNING</label>
+                      <textarea
+                        rows={2}
+                        value={l.secondarySpecs || ''}
+                        onChange={e => updateLoadout(idx, 'secondarySpecs', e.target.value)}
+                        placeholder="Extended Mag • Red Dot Optic • Angled Foregrip..."
+                      />
+                    </div>
+
+                    <div className="admin-loadout-col">
+                      <label className="mono">TACTICAL & LETHAL UTILITY</label>
+                      <input
+                        type="text"
+                        value={l.utility || ''}
+                        onChange={e => updateLoadout(idx, 'utility', e.target.value)}
+                        placeholder="Smoke Grenade & Semtex"
+                      />
+                      <label className="mono mt-2">CARD ACCENT COLOR</label>
+                      <div className="admin-color-picker-row">
+                        <input
+                          type="color"
+                          value={l.color || '#ff453a'}
+                          onChange={e => updateLoadout(idx, 'color', e.target.value)}
+                          className="admin-color-input"
+                        />
+                        <span className="mono admin-color-hex">{l.color || '#ff453a'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 5: RIG & HARDWARE */}
+        {activeTab === 'hardware' && (
+          <div className="admin-tab-content">
+            <div className="admin-section-header">
+              <h2>Gaming Rig & Sensitivity Settings</h2>
+              <p className="admin-section-desc">Public hardware specifications, mouse sensitivity, and audio EQ specs shown on the Loadouts page.</p>
+            </div>
+
+            <div className="admin-hardware-cards-grid">
+              <div className="admin-hw-tile">
+                <div className="admin-hw-icon">🖱️</div>
+                <div className="admin-hw-fields">
+                  <label className="mono">MOUSE DPI</label>
+                  <input
+                    type="text"
+                    value={profile.hardware.dpi}
+                    onChange={e => updateHardware('dpi', e.target.value)}
+                    placeholder="800"
+                  />
+                  <small className="admin-hint">Hardware native mouse polling rate DPI.</small>
+                </div>
+              </div>
+
+              <div className="admin-hw-tile">
+                <div className="admin-hw-icon">🎯</div>
+                <div className="admin-hw-fields">
+                  <label className="mono">IN-GAME SENSITIVITY</label>
+                  <input
+                    type="text"
+                    value={profile.hardware.sens}
+                    onChange={e => updateHardware('sens', e.target.value)}
+                    placeholder="6.5% X / 6.5% Y"
+                  />
+                  <small className="admin-hint">General look and hipfire turning sensitivity.</small>
+                </div>
+              </div>
+
+              <div className="admin-hw-tile">
+                <div className="admin-hw-icon">🔭</div>
+                <div className="admin-hw-fields">
+                  <label className="mono">ADS MULTIPLIER</label>
+                  <input
+                    type="text"
+                    value={profile.hardware.ads}
+                    onChange={e => updateHardware('ads', e.target.value)}
+                    placeholder="1.0 NATIVE"
+                  />
+                  <small className="admin-hint">Aim-down-sights zoom multiplier.</small>
+                </div>
+              </div>
+
+              <div className="admin-hw-tile">
+                <div className="admin-hw-icon">🖥️</div>
+                <div className="admin-hw-fields">
+                  <label className="mono">MONITOR & REFRESH RATE</label>
+                  <input
+                    type="text"
+                    value={profile.hardware.monitor}
+                    onChange={e => updateHardware('monitor', e.target.value)}
+                    placeholder="240HZ FAST IPS"
+                  />
+                  <small className="admin-hint">Display resolution and panel refresh rate.</small>
+                </div>
+              </div>
+
+              <div className="admin-hw-tile span-all">
+                <div className="admin-hw-icon">🎧</div>
+                <div className="admin-hw-fields">
+                  <label className="mono">AUDIO & FOOTSTEP EQ</label>
+                  <input
+                    type="text"
+                    value={profile.hardware.audio}
+                    onChange={e => updateHardware('audio', e.target.value)}
+                    placeholder="STUDIO IEMs + FOOTSTEP EQ"
+                  />
+                  <small className="admin-hint">Headphones, IEMs, or spatial audio mix used in competitive matches.</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 6: STREAM SCHEDULE */}
+        {activeTab === 'schedule' && (
+          <div className="admin-tab-content">
+            <div className="admin-section-header with-actions">
+              <div>
+                <h2>Broadcast Schedule Radar</h2>
+                <p className="admin-section-desc">Manage recurring stream times, game grinds, and custom alerts for your community.</p>
+              </div>
+
+              <button type="button" className="admin-btn-primary mono" onClick={addScheduleSlot}>
+                ＋ ADD BROADCAST SLOT
+              </button>
+            </div>
+
+            <div className="admin-panel-card mb-4">
+              <label className="mono">BROADCAST RADAR NOTE</label>
+              <textarea
+                rows={2}
+                value={profile.scheduleNote}
+                onChange={e => updateField('scheduleNote', e.target.value)}
+                placeholder="Live broadcast radar synced. Stream alerts & community drops are announced in Discord #live-stream-pings."
+              />
+              <small className="admin-hint">Displayed at the bottom of the schedule card on the Community page.</small>
+            </div>
+
+            <div className="admin-schedule-slots-table">
+              <div className="admin-schedule-table-head mono">
+                <span>DAY(S)</span>
+                <span>BROADCAST TIME</span>
+                <span>GAME / ACTIVITY</span>
+                <span className="text-right">ACTION</span>
+              </div>
+
+              {profile.schedule.map((row, idx) => (
+                <div key={idx} className="admin-schedule-table-row">
+                  <input
+                    type="text"
+                    className="mono"
+                    value={row.days || ''}
+                    onChange={e => updateScheduleSlot(idx, 'days', e.target.value)}
+                    placeholder="MONDAY"
+                  />
+                  <input
+                    type="text"
+                    className="mono"
+                    value={row.time || ''}
+                    onChange={e => updateScheduleSlot(idx, 'time', e.target.value)}
+                    placeholder="6:00 PM EST"
+                  />
+                  <input
+                    type="text"
+                    value={row.activity || ''}
+                    onChange={e => updateScheduleSlot(idx, 'activity', e.target.value)}
+                    placeholder="Fortnite Ranked Arena Grinds"
+                  />
+                  <div className="text-right">
+                    <button
+                      type="button"
+                      className="admin-icon-btn is-danger"
+                      onClick={() => removeScheduleSlot(idx)}
+                      title="Remove Slot"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {profile.schedule.length === 0 && (
+                <div className="admin-empty-state mono">
+                  No fixed schedule configured. Click &ldquo;＋ ADD BROADCAST SLOT&rdquo; above to set stream times.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 7: INTEGRATIONS & SETUP */}
+        {activeTab === 'integrations' && (
+          <div className="admin-tab-content">
+            <div className="admin-section-header">
+              <h2>Integrations & Social Sync</h2>
+              <p className="admin-section-desc">Manage connected platforms, live broadcast status, and webhook alert triggers.</p>
+            </div>
+
+            <div className="admin-card-grid">
+              {/* Social URLs & Toggles */}
+              <div className="admin-panel-card">
+                <div className="admin-panel-card-head">
+                  <h3>Public Socials & Visibility</h3>
+                  <span className="admin-card-tag mono">PLATFORMS</span>
+                </div>
+
+                <div className="admin-form-group">
+                  <label className="mono">Kick Channel URL</label>
+                  <input
+                    type="url"
+                    value={profile.socials.kick}
+                    onChange={e => updateSocial('kick', e.target.value)}
+                    placeholder="https://kick.com/dark-phoneix"
+                  />
+                </div>
+
+                <div className="admin-form-group">
+                  <label className="mono">Discord Server Invite</label>
+                  <input
+                    type="url"
+                    value={profile.socials.discord}
+                    onChange={e => updateSocial('discord', e.target.value)}
+                    placeholder="https://discord.com/users/darkphoenix"
+                  />
+                </div>
+
+                <div className="admin-form-group">
+                  <label className="mono">Twitch Channel URL (Optional)</label>
+                  <input
+                    type="url"
+                    value={profile.socials.twitch}
+                    onChange={e => updateSocial('twitch', e.target.value)}
+                    placeholder="https://twitch.tv/..."
+                  />
+                </div>
+
+                <div className="admin-form-group">
+                  <label className="mono">YouTube Channel URL (Optional)</label>
+                  <input
+                    type="url"
+                    value={profile.socials.youtube}
+                    onChange={e => updateSocial('youtube', e.target.value)}
+                    placeholder="https://youtube.com/@..."
+                  />
+                </div>
+
+                <div className="admin-form-group">
+                  <label className="mono">X / Twitter URL (Optional)</label>
+                  <input
+                    type="url"
+                    value={profile.socials.twitter}
+                    onChange={e => updateSocial('twitter', e.target.value)}
+                    placeholder="https://x.com/..."
+                  />
+                </div>
+
+                <div className="admin-toggles-card">
+                  <label className="admin-toggle-row">
+                    <input
+                      type="checkbox"
+                      checked={profile.showKick}
+                      onChange={e => updateField('showKick', e.target.checked)}
+                    />
+                    <div>
+                      <strong className="mono">Show Kick Broadcast Indicators</strong>
+                      <small className="dim block">Display Kick LIVE pill and &ldquo;Watch on Kick&rdquo; CTAs.</small>
+                    </div>
+                  </label>
+
+                  <label className="admin-toggle-row">
+                    <input
+                      type="checkbox"
+                      checked={profile.showTwitch}
+                      onChange={e => updateField('showTwitch', e.target.checked)}
+                    />
+                    <div>
+                      <strong className="mono">Show Twitch Platform Links</strong>
+                      <small className="dim block">Show Twitch badges and channel link.</small>
+                    </div>
+                  </label>
+
+                  <label className="admin-toggle-row">
+                    <input
+                      type="checkbox"
+                      checked={profile.showYouTube}
+                      onChange={e => updateField('showYouTube', e.target.checked)}
+                    />
+                    <div>
+                      <strong className="mono">Show YouTube Platform Links</strong>
+                      <small className="dim block">Show YouTube video highlights and channel link.</small>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Turnkey Setup Status & Live Test */}
+              <div className="admin-panel-card">
+                <div className="admin-panel-card-head">
+                  <h3>Turnkey Integrations Status</h3>
+                  <span className="admin-card-tag mono">STATUS RADAR</span>
+                </div>
+
+                {setup ? (
+                  <ul className="check-list">
+                    <CheckRow
+                      ok={Boolean(setup.socials.kick)}
+                      label="Kick Stream Connected"
+                      hint="Primary broadcast channel is configured"
+                    />
+                    <CheckRow
+                      ok={Boolean(setup.socials.discord)}
+                      label="Discord Community Link Active"
+                      hint="Matchmaking and squad bunker invite URL"
+                    />
+                    <CheckRow
+                      ok={Boolean(setup.discord.webhook)}
+                      label="Discord Webhook Wired"
+                      hint="DISCORD_WEBHOOK_URL in Railway Variables"
+                    />
+                    <CheckRow
+                      ok={Boolean(tw.clientId && tw.refreshToken)}
+                      label="Twitch API Sync Active"
+                      hint="TWITCH_CLIENT_ID and refresh token"
+                    />
+                    <CheckRow
+                      ok={Boolean(yt.clientId && yt.refreshToken)}
+                      label="YouTube Data API Connected"
+                      hint="YOUTUBE_CLIENT_ID and channel ID"
+                    />
+                  </ul>
+                ) : (
+                  <p className="mono dim">Loading integration status…</p>
+                )}
+
+                <div className="admin-action-buttons-group">
+                  <button type="button" className="admin-btn-secondary mono" onClick={handleRunSync}>
+                    ⚡ RUN INGESTION SYNC NOW
+                  </button>
+                  <button type="button" className="admin-btn-secondary mono" onClick={handleDiscordTest}>
+                    💬 SEND DISCORD TEST ALERT
+                  </button>
+                </div>
+
+                {/* Collapsible Connection Guides */}
+                <div className="admin-guides-box">
+                  <details className="admin-guide-details">
+                    <summary className="mono">1 &bull; Discord Live Webhook Setup (~2 min)</summary>
+                    <ol>
+                      <li>In your Discord server: channel Settings &rarr; Integrations &rarr; Webhooks &rarr; New Webhook &rarr; Copy Webhook URL.</li>
+                      <li>In Railway dashboard (service &rarr; Variables) add it as <code>DISCORD_WEBHOOK_URL</code>.</li>
+                      <li>Click &ldquo;Send Discord Test Alert&rdquo; above to verify messages arrive cleanly.</li>
+                    </ol>
+                  </details>
+
+                  <details className="admin-guide-details">
+                    <summary className="mono">2 &bull; Twitch API & LIVE Auto-Sync (~5 min)</summary>
+                    <ol>
+                      <li>Register an application at <a href="https://dev.twitch.tv/console/apps" target="_blank" rel="noopener noreferrer">dev.twitch.tv/console/apps</a> with OAuth redirect <code>{setup?.baseUrl || 'https://...'}/auth/twitch/callback</code>.</li>
+                      <li>Add <code>TWITCH_CLIENT_ID</code> and <code>TWITCH_CLIENT_SECRET</code> into Railway Variables.</li>
+                      <li>Visit <code>/auth/twitch</code> to authorize and copy the generated refresh token into Railway Variables.</li>
+                    </ol>
+                  </details>
+
+                  <details className="admin-guide-details">
+                    <summary className="mono">3 &bull; YouTube Upload Auto-Sync (~7 min)</summary>
+                    <ol>
+                      <li>In Google Cloud Console, enable YouTube Data API v3 and configure OAuth credentials.</li>
+                      <li>Add <code>YOUTUBE_CLIENT_ID</code>, <code>YOUTUBE_CLIENT_SECRET</code>, and <code>YOUTUBE_CHANNEL_ID</code> in Railway Variables.</li>
+                      <li>Visit <code>/auth/youtube</code> to link your channel and sync uploads automatically.</li>
+                    </ol>
+                  </details>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
-    </>
+
+      {/* Floating Sticky Save Bar */}
+      <aside className={`admin-save-bar ${hasChanges ? 'has-unsaved' : ''}`}>
+        <div className="admin-save-bar-content">
+          <div className="admin-save-bar-status mono">
+            {hasChanges ? (
+              <span className="save-pulse-dot">● Unsaved Changes</span>
+            ) : (
+              <span className="save-synced-text">✓ All changes saved to server</span>
+            )}
+          </div>
+
+          <div className="admin-save-bar-actions">
+            {hasChanges && (
+              <button
+                type="button"
+                className="admin-btn-ghost mono"
+                onClick={() => {
+                  if (savedProfile) {
+                    setProfile(JSON.parse(JSON.stringify(savedProfile)));
+                    setHasChanges(false);
+                  }
+                }}
+              >
+                RESET
+              </button>
+            )}
+            <button
+              type="button"
+              className="admin-btn-save mono"
+              onClick={handleSave}
+              disabled={isSaving || !hasChanges}
+            >
+              {isSaving ? 'SAVING…' : 'SAVE CHANGES'}
+            </button>
+          </div>
+        </div>
+      </aside>
+    </div>
   );
 }
